@@ -12,9 +12,8 @@ public:
     ControlWindow(const TGWindow *p, int w, int h);
     virtual ~ControlWindow();
 
-private:
     TGHorizontalFrame *fNavigationFrame;
-    TGTextButton      *prev, *next;
+    TGTextButton      *prevButton, *nextButton;
     TGNumberEntryField       *eventEntry;
 
     ClassDef(ControlWindow, 0)
