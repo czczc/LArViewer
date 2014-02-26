@@ -27,7 +27,8 @@ Thumbs.db
 *.log
 *.mac
 
-# tmp directories#
-###################
+# tmp and test directories/files #
+##################################
 tmp/
 bin/
+test.*
