@@ -4,13 +4,20 @@
 #include "TGFrame.h"
 #include "TRootEmbeddedCanvas.h"
 
+class TPad;
+
 class ViewWindow: public TRootEmbeddedCanvas
 {
 public:
     ViewWindow(const TGWindow *p, int w,int h);
     virtual ~ViewWindow();
 
-    TCanvas* Canvas() { return GetCanvas(); };
+    void InitCanvas();
+    void InitStyle();
+    void PaletteRainbow();
+    void PaletteGray();
+
+    TCanvas* can; 
 
     ClassDef(ViewWindow, 0)
 };

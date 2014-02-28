@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -37,3 +38,4 @@ void MCChannel::PrintInfo()
 
     cout << endl;
 }
+

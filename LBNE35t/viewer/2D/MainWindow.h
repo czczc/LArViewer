@@ -19,8 +19,6 @@ public:
     MainWindow(const TGWindow *p, int w,int h);
     virtual ~MainWindow();
 
-    void HandleMenu(int id);
-
 private:
     TGHorizontalFrame *fViewAndControlFrame;
     ViewWindow        *fViewWindow;
@@ -29,8 +27,8 @@ private:
     TGMenuBar         *fMenuBar;
     TGPopupMenu       *fMenuFile;
     TGLayoutHints     *fMenuBarItemLayout;
+    
     void InitMenu();
-
     void CleanUp();
 
    ClassDef(MainWindow, 0)

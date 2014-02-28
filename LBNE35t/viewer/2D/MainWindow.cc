@@ -2,9 +2,7 @@
 #include "ViewWindow.h"
 #include "ControlWindow.h"
 
-#include "TApplication.h"
 #include "TGMenu.h"
-#include "TGFileDialog.h"
 
 #include "TString.h"
 
@@ -20,7 +18,7 @@ MainWindow::MainWindow(const TGWindow *p, int w,int h)
     fViewAndControlFrame = new TGHorizontalFrame(this, w, h, kFixedWidth);
     AddFrame(fViewAndControlFrame, new TGLayoutHints(kLHintsExpandX  | kLHintsExpandY, 2, 2, 2, 2));
 
-    fViewWindow = new ViewWindow(fViewAndControlFrame, w-200, h);
+    fViewWindow = new ViewWindow(fViewAndControlFrame, w-200-10, h);
     fViewAndControlFrame->AddFrame(fViewWindow, new TGLayoutHints(
         // kLHintsTop | kFixedWidth, 2, 2, 2, 2));
         kLHintsTop | kLHintsExpandX  | kLHintsExpandY, 2, 2, 2, 2));
@@ -46,36 +44,11 @@ void MainWindow::InitMenu()
     fMenuFile->AddEntry("&Open...", M_FILE_OPEN);
     fMenuFile->AddSeparator();
     fMenuFile->AddEntry(new TGHotString("E&xit"), M_FILE_EXIT);
-    fMenuFile->Connect("Activated(int)", "MainWindow", this, "HandleMenu(int)");
 
     fMenuBar->AddPopup(new TGHotString("&File"), fMenuFile, fMenuBarItemLayout);
 
 }
 
-void MainWindow::HandleMenu(int id)
-{
-    const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
-    switch (id) {
-        case M_FILE_OPEN:
-            {
-                static TString dir("../../data");
-                TGFileInfo fi;
-                fi.fFileTypes = filetypes;
-                fi.fIniDir    = StrDup(dir);
-                new TGFileDialog(gClient->GetRoot(), this, kFDOpen, &fi);
-                dir = fi.fIniDir;
-                if (fi.fFilename) {
-                    cout << "open file: " << fi.fFilename << endl;
-                    // fViewWindow->Open(fi.fFilename);
-                }
-            }
-            break;
-
-        case M_FILE_EXIT:
-            gApplication->Terminate(0);
-            break;
-    }
-}
 
 MainWindow::~MainWindow()
 {
