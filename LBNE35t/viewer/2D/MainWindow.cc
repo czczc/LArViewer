@@ -18,12 +18,13 @@ MainWindow::MainWindow(const TGWindow *p, int w,int h)
     fViewAndControlFrame = new TGHorizontalFrame(this, w, h, kFixedWidth);
     AddFrame(fViewAndControlFrame, new TGLayoutHints(kLHintsExpandX  | kLHintsExpandY, 2, 2, 2, 2));
 
-    fViewWindow = new ViewWindow(fViewAndControlFrame, w-200-10, h);
+    int controlWindowWidth = 240;
+    fViewWindow = new ViewWindow(fViewAndControlFrame, w-controlWindowWidth-10, h);
     fViewAndControlFrame->AddFrame(fViewWindow, new TGLayoutHints(
         // kLHintsTop | kFixedWidth, 2, 2, 2, 2));
         kLHintsTop | kLHintsExpandX  | kLHintsExpandY, 2, 2, 2, 2));
 
-    fControlWindow = new ControlWindow(fViewAndControlFrame, 200, h);
+    fControlWindow = new ControlWindow(fViewAndControlFrame, controlWindowWidth, h);
     fViewAndControlFrame->AddFrame(fControlWindow, new TGLayoutHints(
         kLHintsTop  | kFixedWidth, 2, 2, 2, 2));
 

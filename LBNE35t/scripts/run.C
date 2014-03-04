@@ -2,5 +2,5 @@
     gROOT->Reset();
     gROOT->ProcessLine(".x loadClasses.C" );
 
-    new GuiController(gClient->GetRoot(), 800, 900);
+    new GuiController(gClient->GetRoot(), 900, 900);
 }

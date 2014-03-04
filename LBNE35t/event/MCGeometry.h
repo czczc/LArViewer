@@ -22,6 +22,8 @@ public:
     //  methods
     void ReadChanneleWireMap(const char* mapFileName);
     void PrintInfo();
+    double ProjectionZ(int tpc, int wire); // projection to Z coordinate for collection plane
+    double ProjectionX(int tpc, int tdc);  // projection to X coordinate for drifting
 };
 
 #endif

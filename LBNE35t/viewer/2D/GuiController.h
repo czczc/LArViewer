@@ -3,8 +3,9 @@
 
 #include "TGFrame.h"
 #include "RQ_OBJECT.h"
-#include "TMarker.h"
+#include "TGString.h"
 #include <vector>
+#include <map>
 
 class MainWindow;
 class ViewWindow;
@@ -13,6 +14,8 @@ class MCEvent;
 class MCGeometry;
 class TCanvas;
 class TH2F;
+class TLine;
+class TMarker;
 
 class GuiController
 {
@@ -24,15 +27,31 @@ public:
     void Open(const char* filename);
     void Reload();
     void InitConnections();
+    void InitPDGMap();
     void DrawPixels();
     void Modified();
-    
+
     // slots
     void Prev();
     void Next();
+    void AutoZoom();
+    void UnZoom(bool redraw=true);
+    void SyncRangeZT();
+    void SyncRangeUT();
+    void SyncRangeVT();
     void SyncXaxis();
     void UpdatePalette(int id);
+    void SiblingSelected(int id);
+    void ParentOrDaughterSelected(int id);
     void HandleMenu(int id);
+
+    void InitTracksList();
+    void AutoZoom(TH2F* hist, bool zoomY=true);
+    void DrawTrack(int id);
+
+    // utilities
+    double KE(float* momentum);  // KE
+    TGString PDGName(int pdg);
 
     MainWindow *mw;
     ViewWindow *vw;
@@ -40,14 +59,17 @@ public:
     MCEvent *event;
     MCGeometry *geom;
 
-
     TCanvas *can;
-    vector<TMarker> pixels_ZT;
-    vector<TMarker> pixels_UT;
-    vector<TMarker> pixels_VT;
 
     int currentEvent;
     int currentPalette;
+    int xMin_now, xMax_now;
+
+    TLine* trackLine;
+    TMarker* trackStartPoint;
+
+    map<int, TGString> pdgMap;
+
 };
 
 #endif

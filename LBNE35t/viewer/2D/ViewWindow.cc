@@ -45,10 +45,12 @@ void ViewWindow::InitStyle()
     gStyle->SetPalette(1);
     gStyle->SetTitleStyle(0);
     gStyle->SetTitleBorderSize(0);
-    gStyle->SetTitleOffset(1.3, "x");
-    gStyle->SetTitleOffset(0.8, "y");
-    gStyle->SetLabelSize(0.05, "x");
-    gStyle->SetLabelSize(0.05, "y");
+    gStyle->SetTitleOffset(1.0, "x");
+    gStyle->SetTitleOffset(1.0, "y");
+    gStyle->SetTitleXSize(0.05);
+    gStyle->SetTitleYSize(0.05);
+    gStyle->SetLabelSize(0.06, "x");
+    gStyle->SetLabelSize(0.06, "y");
     gStyle->SetHistLineWidth(2);
     gStyle->SetLegendBorderSize(0);
     
