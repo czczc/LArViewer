@@ -65,8 +65,12 @@ public:
     int currentPalette;
     int xMin_now, xMax_now;
 
-    TLine* trackLine;
-    TMarker* trackStartPoint;
+    TLine* trackLineZ;
+    TMarker* trackStartPointZ;
+    TLine* trackLineU;
+    TMarker* trackStartPointU;
+    TLine* trackLineV;
+    TMarker* trackStartPointV;
 
     map<int, TGString> pdgMap;
 

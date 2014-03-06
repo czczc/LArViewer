@@ -19,7 +19,7 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fNavigationFrame->AddFrame(prevButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
 
     eventEntry = new TGNumberEntryField(fNavigationFrame, -1, 0, TGNumberFormat::kNESInteger);
-    eventEntry->SetDefaultSize(40, 20);
+    eventEntry->SetDefaultSize(80, 20);
     fNavigationFrame->AddFrame(eventEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
 
     nextButton = new TGTextButton(fNavigationFrame, "Next >");

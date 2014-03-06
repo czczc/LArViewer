@@ -27,6 +27,11 @@ MCEvent::MCEvent(const char* filename)
 
 MCEvent::~MCEvent()
 {
+    rootFile->Close();
+    delete rootFile;
+
+    delete geom;
+    
     delete hPixelZT;
     delete hPixelUT;
     delete hPixelVT;    
@@ -64,17 +69,17 @@ void MCEvent::InitHistograms()
     // hPixelUT = new TH2F("hPixelUT", "U vs T", 3200, 0-0.5, 3200-0.5, 400, 0-0.5, 400-0.5);
     // hPixelVT = new TH2F("hPixelVT", "V vs T", 3200, 0-0.5, 3200-0.5, 400, 0-0.5, 400-0.5);
 
-    hPixelZT = new TH2F("hPixelZT", "Z (collection wire axis) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
-    hPixelUT = new TH2F("hPixelUT", "U vs X (drift axis)", 3200, -1, -1+3200*0.0775, 400, 0-0.5, 400-0.5);
-    hPixelVT = new TH2F("hPixelVT", "V vs X (drift axis)", 3200, -1, -1+3200*0.0775, 400, 0-0.5, 400-0.5);
+    hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
+    hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 510, -168, -168+510*0.4888);
+    hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.4888);
 
     hPixelZT->GetXaxis()->SetTitle("x [cm]");
     hPixelUT->GetXaxis()->SetTitle("x [cm]");
     hPixelVT->GetXaxis()->SetTitle("x [cm]");
 
     hPixelZT->GetYaxis()->SetTitle("z [cm]");
-    hPixelUT->GetYaxis()->SetTitle("u [wire no.]");
-    hPixelVT->GetYaxis()->SetTitle("v [wire no.]");
+    hPixelUT->GetYaxis()->SetTitle("v [cm]");
+    hPixelVT->GetYaxis()->SetTitle("u [cm]");
 }
 
 void MCEvent::GetEntry(int entry)
@@ -161,6 +166,12 @@ void MCEvent::FillPixel(int yView, int xView)
                 // y = (double)wire;
                 y = geom->ProjectionZ(tpc, wire);
                 // cout << tpc << " " << wire << " " << y << endl;
+            }
+            else if (yView == kU) {
+                y = geom->ProjectionU(tpc, wire);
+            }
+            else if (yView == kV) {
+                y = geom->ProjectionV(tpc, wire);
             }
 
             int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);

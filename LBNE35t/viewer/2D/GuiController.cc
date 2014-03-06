@@ -32,19 +32,42 @@ using namespace std;
 GuiController::GuiController(const TGWindow *p, int w,int h)
 {
     InitPDGMap();
-    trackLine = new TLine(0,0,0,0);
-    trackLine->SetLineColor(kRed);
-    trackLine->SetLineWidth(2);
-    trackStartPoint = new TMarker(0,0,24);
-    trackStartPoint->SetMarkerColor(kWhite);
-    trackStartPoint->SetMarkerSize(1.0);
+    trackLineZ = new TLine(0,0,0,0);
+    trackLineZ->SetLineColor(kRed);
+    trackLineZ->SetLineWidth(2);
+    trackStartPointZ = new TMarker(0,0,24);
+    trackStartPointZ->SetMarkerColor(kWhite);
+    trackStartPointZ->SetMarkerSize(1.0);
+
+    trackLineU = new TLine(0,0,0,0);
+    trackLineU->SetLineColor(kRed);
+    trackLineU->SetLineWidth(2);
+    trackStartPointU = new TMarker(0,0,24);
+    trackStartPointU->SetMarkerColor(kWhite);
+    trackStartPointU->SetMarkerSize(1.0);
+
+    trackLineV = new TLine(0,0,0,0);
+    trackLineV->SetLineColor(kRed);
+    trackLineV->SetLineWidth(2);
+    trackStartPointV = new TMarker(0,0,24);
+    trackStartPointV->SetMarkerColor(kWhite);
+    trackStartPointV->SetMarkerSize(1.0);
 
     mw = new MainWindow(p, w, h);
     vw = mw->fViewWindow;
     cw = mw->fControlWindow;
     can = vw->can;
+    
+    const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
+    static TString dir("../data");
+    TGFileInfo fi;
+    fi.fFileTypes = filetypes;
+    fi.fIniDir    = StrDup(dir);
+    new TGFileDialog(gClient->GetRoot(), mw, kFDOpen, &fi);
+    dir = fi.fIniDir;
 
-    event = new MCEvent("../data/sample.root");
+    // event = new MCEvent("../data/sample.root");
+    event = new MCEvent(fi.fFilename);
     geom = event->geom;
     currentEvent = 0;
     currentPalette = 1;
@@ -59,7 +82,8 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
 
 GuiController::~GuiController()
 {
-    delete trackLine;
+    delete trackLineZ;
+    delete trackStartPointZ;
 }
 
 void GuiController::InitConnections()
@@ -198,17 +222,44 @@ void GuiController::DrawTrack(int id)
 {
     int i = event->trackIndex[id];
     // cout << i << " " << event->mc_startXYZT[i][0] << endl;
-    trackLine->SetX1(event->mc_startXYZT[i][0]);
-    trackLine->SetY1(event->mc_startXYZT[i][2]);
-    trackLine->SetX2(event->mc_endXYZT[i][0]);
-    trackLine->SetY2(event->mc_endXYZT[i][2]);
+    trackLineZ->SetX1(event->mc_startXYZT[i][0]);
+    trackLineZ->SetY1(event->mc_startXYZT[i][2]);
+    trackLineZ->SetX2(event->mc_endXYZT[i][0]);
+    trackLineZ->SetY2(event->mc_endXYZT[i][2]);
 
-    trackStartPoint->SetX(event->mc_startXYZT[i][0]);
-    trackStartPoint->SetY(event->mc_startXYZT[i][2]);
+    trackStartPointZ->SetX(event->mc_startXYZT[i][0]);
+    trackStartPointZ->SetY(event->mc_startXYZT[i][2]);
 
     can->cd(1);
-    trackLine->Draw();
-    trackStartPoint->Draw();
+    trackLineZ->Draw();
+    trackStartPointZ->Draw();
+
+
+    trackLineU->SetX1(event->mc_startXYZT[i][0]);
+    trackLineU->SetY1((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineU->SetX2(event->mc_endXYZT[i][0]);
+    trackLineU->SetY2((event->mc_endXYZT[i][1]-event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
+
+    trackStartPointU->SetX(event->mc_startXYZT[i][0]);
+    trackStartPointU->SetY((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+
+    can->cd(2);
+    trackLineU->Draw();
+    trackStartPointU->Draw();
+
+
+    trackLineV->SetX1(event->mc_startXYZT[i][0]);
+    trackLineV->SetY1((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineV->SetX2(event->mc_endXYZT[i][0]);
+    trackLineV->SetY2((event->mc_endXYZT[i][1]+event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
+
+    trackStartPointV->SetX(event->mc_startXYZT[i][0]);
+    trackStartPointV->SetY((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+
+    can->cd(3);
+    trackLineV->Draw();
+    trackStartPointV->Draw();
+
     Modified();
 }
 
@@ -238,11 +289,11 @@ void GuiController::Next()
 
 
 void GuiController::Reload()
-{
+{    
     cw->eventEntry->SetNumber(currentEvent);
     event->GetEntry(currentEvent);
-    event->PrintInfo(1);
-    // event->PrintInfo();
+    // event->PrintInfo(1);
+    event->PrintInfo();
  
     InitTracksList();
     DrawPixels();
