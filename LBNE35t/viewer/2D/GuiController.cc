@@ -57,7 +57,7 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
     vw = mw->fViewWindow;
     cw = mw->fControlWindow;
     can = vw->can;
-    
+
     const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
     static TString dir("../data");
     TGFileInfo fi;
@@ -123,8 +123,8 @@ void GuiController::UnZoom(bool redraw)
     event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now); 
     event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
     event->hPixelZT->GetYaxis()->SetRange(1, 343); 
-    event->hPixelUT->GetYaxis()->SetRange(1, 400); 
-    event->hPixelVT->GetYaxis()->SetRange(1, 400);
+    event->hPixelUT->GetYaxis()->SetRange(1, 510); 
+    event->hPixelVT->GetYaxis()->SetRange(1, 495);
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
     if (redraw) Modified();

@@ -13,10 +13,10 @@
 
 using namespace std;
 
-MCGeometry::MCGeometry(const char* mapFileName, const char* rootFileName)
+MCGeometry::MCGeometry(const char* mapFileName)
 {
-    rootFile = new TFile(rootFileName);
-    geoTree = (TTree*)rootFile->Get("/Detector/Geometry");
+    // rootFile = new TFile(rootFileName);
+    // geoTree = (TTree*)rootFile->Get("/Detector/Geometry");
 
     ReadChanneleWireMap(mapFileName);
 

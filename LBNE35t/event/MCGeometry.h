@@ -11,12 +11,12 @@ class TString;
 
 class MCGeometry {
 public:
-    TFile *rootFile;
-    TTree *geoTree;
+    // TFile *rootFile;
+    // TTree *geoTree;
 
     MCChannel fChannels[NCHANNELS];
 
-    MCGeometry(const char* mapFileName="../Geometry/ChannelWireMap.txt", const char* rootFileName="../data/sample.root");
+    MCGeometry(const char* mapFileName="../Geometry/ChannelWireMap.txt");
     virtual ~MCGeometry();
 
     //  methods
