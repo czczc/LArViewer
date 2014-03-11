@@ -57,9 +57,11 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // Palette Selection
-    paletteButtonGroup = new TGButtonGroup(this, "Palette", kVerticalFrame); 
-    rainbowPaletteButton = new TGRadioButton(paletteButtonGroup, "Rainbow"); 
-    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray"); 
+    paletteButtonGroup = new TGButtonGroup(this, "Color Theme", kVerticalFrame); 
+    rainbowPaletteButton = new TGRadioButton(paletteButtonGroup, "Rainbow (Night)"); 
+    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Night)"); 
+    summerPaletteButton = new TGRadioButton(paletteButtonGroup, "Summer (Day)"); 
+    grayinvPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Day)"); 
     rainbowPaletteButton->SetState(kButtonDown);
     AddFrame(paletteButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 

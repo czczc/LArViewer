@@ -69,7 +69,6 @@ public:
     TH2F *hPixelUT;
     TH2F *hPixelVT;
 
-
     //-------------------------------------
     MCEvent();
     MCEvent(const char* filename);

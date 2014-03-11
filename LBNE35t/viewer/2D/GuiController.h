@@ -48,6 +48,7 @@ public:
     void InitTracksList();
     void AutoZoom(TH2F* hist, bool zoomY=true);
     void DrawTrack(int id);
+    void SetTheme(int theme);
 
     // utilities
     double KE(float* momentum);  // KE
@@ -73,6 +74,8 @@ public:
     TMarker* trackStartPointV;
 
     map<int, TGString> pdgMap;
+
+    int currentTheme;
 
 };
 

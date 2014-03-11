@@ -32,6 +32,8 @@ using namespace std;
 GuiController::GuiController(const TGWindow *p, int w,int h)
 {
     InitPDGMap();
+    currentTheme = 0; // night theme
+
     trackLineZ = new TLine(0,0,0,0);
     trackLineZ->SetLineColor(kRed);
     trackLineZ->SetLineWidth(2);
@@ -182,10 +184,33 @@ void GuiController::SyncXaxis()
 void GuiController::UpdatePalette(int id)
 {
     if (id == currentPalette) return; 
-    if (id == 1) vw->PaletteRainbow();
+         if (id == 1) vw->PaletteRainbow();
     else if (id == 2) vw->PaletteGray();
+    else if (id == 3) vw->PaletteSummer();
+    else if (id == 4) vw->PaletteGrayInv();
     currentPalette = id;
+
+    if (id==1 || id==2) currentTheme = 0;
+    else currentTheme = 1;
+    SetTheme(currentTheme);
+
     Modified();
+    cout << "changing theme: " << id << endl;
+}
+
+void GuiController::SetTheme(int theme)
+{
+    if (theme == 0) {
+        event->hPixelZT->SetMinimum(-1);
+        event->hPixelUT->SetMinimum(-1);
+        event->hPixelVT->SetMinimum(-1);
+    }
+    else {
+        event->hPixelZT->SetMinimum(0);
+        event->hPixelUT->SetMinimum(0);
+        event->hPixelVT->SetMinimum(0);
+    }
+    vw->SetTheme(theme);
 }
 
 void GuiController::Modified()
@@ -214,6 +239,7 @@ void GuiController::DrawPixels()
     event->FillPixel(1, -1); // VT
     event->hPixelVT->Draw("colz");
 
+    SetTheme(currentTheme);
     Modified();
 }
 

@@ -195,7 +195,7 @@ void MCEvent::FillPixel(int yView, int xView)
         }
         // cout << endl;
     }
-    h->SetMinimum(-1); // produces an "inverted picture"
+    
 }
 
 

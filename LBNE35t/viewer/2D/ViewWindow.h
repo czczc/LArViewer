@@ -16,7 +16,9 @@ public:
     void InitStyle();
     void PaletteRainbow();
     void PaletteGray();
-
+    void PaletteSummer();
+    void PaletteGrayInv();
+    void SetTheme(int theme);
     TCanvas* can; 
 
     ClassDef(ViewWindow, 0)

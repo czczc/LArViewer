@@ -26,9 +26,11 @@ public:
     TGTextButton       *autoZoomButton;
     TGTextButton       *unZoomButton;
 
-    TGButtonGroup *paletteButtonGroup;
-    TGRadioButton *rainbowPaletteButton; 
-    TGRadioButton *grayPaletteButton;
+    TGButtonGroup      *paletteButtonGroup;
+    TGRadioButton      *rainbowPaletteButton; 
+    TGRadioButton      *grayPaletteButton;
+    TGRadioButton      *summerPaletteButton;
+    TGRadioButton      *grayinvPaletteButton;
 
     TGGroupFrame       *fMCGroupFrame;
     TGHorizontalFrame  *fTracksFrame;
