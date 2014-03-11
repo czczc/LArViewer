@@ -22,6 +22,7 @@ MCEvent::MCEvent(const char* filename)
 
     geom = new MCGeometry();
     optionInductionSignal = 1; // default draw positive signal only
+    for (int i=0; i<4; i++) showAPA[i] = true;
 
     InitBranchAddress();
     InitHistograms();
@@ -162,6 +163,8 @@ void MCEvent::FillPixel(int yView, int xView)
 
             // skip short drift chamber
             if (tpc % 2 == 0) continue; 
+            // only show designated APA's
+            if (!showAPA[(tpc-1)/2]) continue;
 
             double y = (double)wire;
             if (yView == kZ) {

@@ -70,6 +70,7 @@ public:
     TH2F *hPixelVT;
 
     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
+    bool showAPA[4];
 
     //-------------------------------------
     MCEvent();

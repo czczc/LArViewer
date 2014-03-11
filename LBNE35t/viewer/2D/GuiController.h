@@ -43,6 +43,7 @@ public:
     void UpdateZaxis();
     void UpdatePalette(int id);
     void UpdateInductionSig(int id);
+    void UpdateAPA(int id);
     void SiblingSelected(int id);
     void ParentOrDaughterSelected(int id);
     void HandleMenu(int id);

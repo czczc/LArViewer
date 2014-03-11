@@ -9,6 +9,7 @@ class TGButtonGroup;
 class TGRadioButton;
 class TGListBox;
 class TGDoubleVSlider;
+class TGCheckButton;
 
 class ControlWindow: public TGVerticalFrame
 {
@@ -34,6 +35,12 @@ public:
     TGRadioButton      *inductionSigButton_pos; 
     TGRadioButton      *inductionSigButton_neg;
     TGRadioButton      *inductionSigButton_both;
+    TGButtonGroup      *apaButtonGroup;
+    TGCheckButton      *apaButton_1;
+    TGCheckButton      *apaButton_2;
+    TGCheckButton      *apaButton_3;
+    TGCheckButton      *apaButton_4;
+
 
     TGHorizontalFrame  *fColorScaleFrame; 
     TGButtonGroup      *paletteButtonGroup;

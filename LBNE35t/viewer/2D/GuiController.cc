@@ -103,6 +103,8 @@ void GuiController::InitConnections()
     cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
     cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
     cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
+    cw->apaButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateAPA(int)");
+
     cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "SiblingSelected(int)");
     cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
     cw->fParentTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
@@ -228,6 +230,18 @@ void GuiController::UpdateInductionSig(int id)
     Reload();
     cout << "changing induction signal: " << id << endl;
 }
+
+
+void GuiController::UpdateAPA(int id)
+{
+    TGCheckButton *b = (TGCheckButton*)cw->apaButtonGroup->GetButton(id);
+    if (b->IsDown()) event->showAPA[id-1] = true;
+    else event->showAPA[id-1] = false;
+
+    Reload();
+    cout << "toggle APA " << id << ": " << b->IsDown() << endl;
+}
+
 
 void GuiController::SetTheme(int theme)
 {

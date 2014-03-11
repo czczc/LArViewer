@@ -48,7 +48,7 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
 
     xrangeButton = new TGTextButton(fXaxisFrame, "X Range");
     fXaxisFrame->AddFrame(xrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
-    
+
     tdcMinEntry = new TGNumberEntryField(fXaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
     tdcMinEntry->SetDefaultSize(40, 20);
     tdcMinEntry->SetIntNumber(0);
@@ -89,6 +89,18 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     inductionSigButton_neg = new TGRadioButton(inductionSigButtonGroup, "Negative    ");
     inductionSigButton_both = new TGRadioButton(inductionSigButtonGroup, "Both    ");
     inductionSigButton_pos->SetState(kButtonDown);
+
+    // APA button group
+    apaButtonGroup = new TGButtonGroup(fZoomControlFrame, "Show APA", kHorizontalFrame);
+    fZoomControlFrame->AddFrame(apaButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    apaButton_1 = new TGCheckButton(apaButtonGroup, "1  ");
+    apaButton_2 = new TGCheckButton(apaButtonGroup, "2  ");
+    apaButton_3 = new TGCheckButton(apaButtonGroup, "3  ");
+    apaButton_4 = new TGCheckButton(apaButtonGroup, "4  ");
+    apaButton_1->SetState(kButtonDown);
+    apaButton_2->SetState(kButtonDown);
+    apaButton_3->SetState(kButtonDown);
+    apaButton_4->SetState(kButtonDown);
 
     // MC group frame
     fMCGroupFrame = new TGGroupFrame(this, "Monte Carlo Truth", kVerticalFrame);
