@@ -5,6 +5,7 @@
 #include "TGButtonGroup.h"
 #include "TGListBox.h"
 #include "TGLabel.h"
+#include "TGDoubleSlider.h"
 
 #include <iostream>
 using namespace std;
@@ -45,7 +46,7 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     tdcMinEntry->SetIntNumber(0);
     fXaxisFrame->AddFrame(tdcMinEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
 
-    xrangeButton = new TGTextButton(fXaxisFrame, "Sync x-axis");
+    xrangeButton = new TGTextButton(fXaxisFrame, "X Range");
     fXaxisFrame->AddFrame(xrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
 
     tdcMaxEntry = new TGNumberEntryField(fXaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
@@ -54,16 +55,30 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fXaxisFrame->AddFrame(tdcMaxEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
 
     fZoomControlFrame->AddFrame(fXaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
-    AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    // Palette Selection
-    paletteButtonGroup = new TGButtonGroup(this, "Color Theme", kVerticalFrame); 
-    rainbowPaletteButton = new TGRadioButton(paletteButtonGroup, "Rainbow (Night)"); 
-    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Night)"); 
-    summerPaletteButton = new TGRadioButton(paletteButtonGroup, "Summer (Day)"); 
-    grayinvPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Day)"); 
-    rainbowPaletteButton->SetState(kButtonDown);
-    AddFrame(paletteButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    // ZaxisFrame Frame
+    fZaxisFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);
+
+    zrangeButton = new TGTextButton(fZaxisFrame, "Color Scale");
+    fZaxisFrame->AddFrame(zrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
+
+    ztColorEntry = new TGNumberEntryField(fZaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
+    ztColorEntry->SetDefaultSize(40, 20);
+    ztColorEntry->SetIntNumber(0);
+    fZaxisFrame->AddFrame(ztColorEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
+
+    utColorEntry = new TGNumberEntryField(fZaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
+    utColorEntry->SetDefaultSize(40, 20);
+    utColorEntry->SetIntNumber(0);
+    fZaxisFrame->AddFrame(utColorEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
+    fZoomControlFrame->AddFrame(fZaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+
+    vtColorEntry = new TGNumberEntryField(fZaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
+    vtColorEntry->SetDefaultSize(40, 20);
+    vtColorEntry->SetIntNumber(0);
+    fZaxisFrame->AddFrame(vtColorEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
+    
+    AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // MC group frame
     fMCGroupFrame = new TGGroupFrame(this, "Monte Carlo Truth", kVerticalFrame);
@@ -98,6 +113,22 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fTracksFrame->AddFrame(fDaughterTracksFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     fMCGroupFrame->AddFrame(fTracksFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     AddFrame(fMCGroupFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+
+
+    // Palette Selection
+    fColorScaleFrame = new TGHorizontalFrame(this, w, 100);
+    paletteButtonGroup = new TGButtonGroup(fColorScaleFrame, "Color Theme", kVerticalFrame); 
+    rainbowPaletteButton = new TGRadioButton(paletteButtonGroup, "Rainbow (Night)"); 
+    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Night)"); 
+    summerPaletteButton = new TGRadioButton(paletteButtonGroup, "Summer (Day)"); 
+    grayinvPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Day)"); 
+    rainbowPaletteButton->SetState(kButtonDown);
+
+    // fZTSlider = new TGDoubleVSlider(fColorScaleFrame, 90, 2, -1, kVerticalFrame, GetDefaultFrameBackground(), kTRUE);
+
+    fColorScaleFrame->AddFrame(paletteButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    // fColorScaleFrame->AddFrame(fZTSlider, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    AddFrame(fColorScaleFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
 }
 

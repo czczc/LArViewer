@@ -40,6 +40,7 @@ public:
     void SyncRangeUT();
     void SyncRangeVT();
     void SyncXaxis();
+    void UpdateZaxis();
     void UpdatePalette(int id);
     void SiblingSelected(int id);
     void ParentOrDaughterSelected(int id);

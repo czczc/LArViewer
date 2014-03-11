@@ -14,6 +14,7 @@
 #include "TGFileDialog.h"
 #include "TGListBox.h"
 #include "TGString.h"
+#include "TGDoubleSlider.h"
 
 #include "TCanvas.h"
 #include "TPad.h"
@@ -97,6 +98,7 @@ void GuiController::InitConnections()
     cw->autoZoomButton->Connect("Clicked()", "GuiController", this, "AutoZoom()");
     cw->unZoomButton->Connect("Clicked()", "GuiController", this, "UnZoom()");
     cw->xrangeButton->Connect("Clicked()", "GuiController", this, "SyncXaxis()");
+    cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
     cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
     cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "SiblingSelected(int)");
     cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
@@ -106,6 +108,9 @@ void GuiController::InitConnections()
     can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
     can->GetPad(3)->Connect("RangeChanged()", "GuiController", this, "SyncRangeVT()");
 
+    // cw->fZTSlider->SetRange(-1, event->hPixelZT->GetMaximum());
+    // cw->fZTSlider->SetPosition(-1, event->hPixelZT->GetMaximum());
+    // cw->fZTSlider->Connect("Released()", "GuiController", this, "UpdateZRangeZT()");
 }
 
 void GuiController::AutoZoom()
@@ -142,6 +147,20 @@ void GuiController::SyncRangeZT()
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
     cout << "Range Changed: " << xMin_now << ", " << xMax_now << endl;
+    Modified();
+}
+
+void GuiController::UpdateZaxis()
+{
+    int zt = cw->ztColorEntry->GetNumber();
+    int ut = cw->utColorEntry->GetNumber();
+    int vt = cw->vtColorEntry->GetNumber();
+
+    int min = -1;
+    if (currentTheme == 1) min = 0;
+    event->hPixelZT->GetZaxis()->SetRangeUser(min, zt);
+    event->hPixelUT->GetZaxis()->SetRangeUser(min, ut);
+    event->hPixelVT->GetZaxis()->SetRangeUser(min, vt);
     Modified();
 }
 
@@ -227,17 +246,27 @@ void GuiController::Modified()
 
 void GuiController::DrawPixels()
 {
+    TH2F *h = 0;
+
     can->cd(1);
     event->FillPixel(2, -1); // ZT
-    event->hPixelZT->Draw("colz");
+    h = event->hPixelZT;
+    h->Draw("colz");
+    cw->ztColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
+
 
     can->cd(2);
     event->FillPixel(0, -1); // UT
-    event->hPixelUT->Draw("colz");
+    h = event->hPixelUT;
+    h->Draw("colz");
+    cw->utColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
+
 
     can->cd(3);
     event->FillPixel(1, -1); // VT
-    event->hPixelVT->Draw("colz");
+    h = event->hPixelVT;
+    h->Draw("colz");
+    cw->vtColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
 
     SetTheme(currentTheme);
     Modified();

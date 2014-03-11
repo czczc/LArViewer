@@ -8,6 +8,7 @@ class TGNumberEntryField;
 class TGButtonGroup;
 class TGRadioButton;
 class TGListBox;
+class TGDoubleVSlider;
 
 class ControlWindow: public TGVerticalFrame
 {
@@ -20,17 +21,23 @@ public:
     TGNumberEntryField *eventEntry; 
 
     TGGroupFrame       *fZoomControlFrame;
+    TGTextButton       *autoZoomButton;
+    TGTextButton       *unZoomButton;
     TGHorizontalFrame  *fXaxisFrame;
     TGTextButton       *xrangeButton;
     TGNumberEntryField *tdcMinEntry, *tdcMaxEntry;
-    TGTextButton       *autoZoomButton;
-    TGTextButton       *unZoomButton;
+    TGHorizontalFrame  *fZaxisFrame;
+    TGTextButton       *zrangeButton;
+    TGNumberEntryField *ztColorEntry, *utColorEntry, *vtColorEntry;
 
+    TGHorizontalFrame  *fColorScaleFrame; 
     TGButtonGroup      *paletteButtonGroup;
     TGRadioButton      *rainbowPaletteButton; 
     TGRadioButton      *grayPaletteButton;
     TGRadioButton      *summerPaletteButton;
     TGRadioButton      *grayinvPaletteButton;
+    // TGDoubleVSlider    *fZTSlider;
+
 
     TGGroupFrame       *fMCGroupFrame;
     TGHorizontalFrame  *fTracksFrame;
