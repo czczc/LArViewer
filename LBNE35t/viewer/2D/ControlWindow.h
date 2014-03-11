@@ -21,6 +21,7 @@ public:
     TGNumberEntryField *eventEntry; 
 
     TGGroupFrame       *fZoomControlFrame;
+    TGHorizontalFrame  *fZoomButtonFrame;
     TGTextButton       *autoZoomButton;
     TGTextButton       *unZoomButton;
     TGHorizontalFrame  *fXaxisFrame;
@@ -29,6 +30,10 @@ public:
     TGHorizontalFrame  *fZaxisFrame;
     TGTextButton       *zrangeButton;
     TGNumberEntryField *ztColorEntry, *utColorEntry, *vtColorEntry;
+    TGButtonGroup      *inductionSigButtonGroup;
+    TGRadioButton      *inductionSigButton_pos; 
+    TGRadioButton      *inductionSigButton_neg;
+    TGRadioButton      *inductionSigButton_both;
 
     TGHorizontalFrame  *fColorScaleFrame; 
     TGButtonGroup      *paletteButtonGroup;

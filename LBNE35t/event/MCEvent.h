@@ -69,6 +69,8 @@ public:
     TH2F *hPixelUT;
     TH2F *hPixelVT;
 
+    int optionInductionSignal;  // 1:pos; 0:both; -1:neg
+
     //-------------------------------------
     MCEvent();
     MCEvent(const char* filename);

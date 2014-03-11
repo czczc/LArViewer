@@ -15,6 +15,7 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
 {
     // Navigation Frame
     fNavigationFrame = new TGHorizontalFrame(this, w, 100, kFixedWidth);
+    AddFrame(fNavigationFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     prevButton = new TGTextButton(fNavigationFrame, "< Prev");
     fNavigationFrame->AddFrame(prevButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
@@ -26,38 +27,42 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     nextButton = new TGTextButton(fNavigationFrame, "Next >");
     fNavigationFrame->AddFrame(nextButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
     
-    AddFrame(fNavigationFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    // zoom control group frame  
-    fZoomControlFrame = new TGGroupFrame(this, "Zoom", kVerticalFrame);
+    // zoom control button frame  
+    fZoomControlFrame = new TGGroupFrame(this, "Display Options", kVerticalFrame);
     fZoomControlFrame->SetTitlePos(TGGroupFrame::kLeft);
+    AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    autoZoomButton = new TGTextButton(fZoomControlFrame, "Auto Zoom");
-    fZoomControlFrame->AddFrame(autoZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    fZoomButtonFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);
+    fZoomControlFrame->AddFrame(fZoomButtonFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    unZoomButton = new TGTextButton(fZoomControlFrame, "UnZoom");
-    fZoomControlFrame->AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    autoZoomButton = new TGTextButton(fZoomButtonFrame, "Auto Zoom");
+    fZoomButtonFrame->AddFrame(autoZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+
+    unZoomButton = new TGTextButton(fZoomButtonFrame, "UnZoom");
+    fZoomButtonFrame->AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // XaxisFrame Frame
     fXaxisFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);
+    fZoomControlFrame->AddFrame(fXaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
+    xrangeButton = new TGTextButton(fXaxisFrame, "X Range");
+    fXaxisFrame->AddFrame(xrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
+    
     tdcMinEntry = new TGNumberEntryField(fXaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
     tdcMinEntry->SetDefaultSize(40, 20);
     tdcMinEntry->SetIntNumber(0);
     fXaxisFrame->AddFrame(tdcMinEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
-
-    xrangeButton = new TGTextButton(fXaxisFrame, "X Range");
-    fXaxisFrame->AddFrame(xrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
 
     tdcMaxEntry = new TGNumberEntryField(fXaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
     tdcMaxEntry->SetDefaultSize(50, 20);
     tdcMaxEntry->SetIntNumber(3200);
     fXaxisFrame->AddFrame(tdcMaxEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
 
-    fZoomControlFrame->AddFrame(fXaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // ZaxisFrame Frame
     fZaxisFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);
+    fZoomControlFrame->AddFrame(fZaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     zrangeButton = new TGTextButton(fZaxisFrame, "Color Scale");
     fZaxisFrame->AddFrame(zrangeButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
@@ -71,14 +76,19 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     utColorEntry->SetDefaultSize(40, 20);
     utColorEntry->SetIntNumber(0);
     fZaxisFrame->AddFrame(utColorEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
-    fZoomControlFrame->AddFrame(fZaxisFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     vtColorEntry = new TGNumberEntryField(fZaxisFrame, -1, 0, TGNumberFormat::kNESInteger);
     vtColorEntry->SetDefaultSize(40, 20);
     vtColorEntry->SetIntNumber(0);
     fZaxisFrame->AddFrame(vtColorEntry, new TGLayoutHints(kLHintsTop | kLHintsCenterY, 3, 2, 2, 2));
     
-    AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    // Induction Signal Group
+    inductionSigButtonGroup = new TGButtonGroup(fZoomControlFrame, "Show Induction Signal", kHorizontalFrame); 
+    fZoomControlFrame->AddFrame(inductionSigButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    inductionSigButton_pos = new TGRadioButton(inductionSigButtonGroup, "Positive    ");
+    inductionSigButton_neg = new TGRadioButton(inductionSigButtonGroup, "Negative    ");
+    inductionSigButton_both = new TGRadioButton(inductionSigButtonGroup, "Both    ");
+    inductionSigButton_pos->SetState(kButtonDown);
 
     // MC group frame
     fMCGroupFrame = new TGGroupFrame(this, "Monte Carlo Truth", kVerticalFrame);

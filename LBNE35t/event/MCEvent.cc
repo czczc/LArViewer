@@ -21,6 +21,8 @@ MCEvent::MCEvent(const char* filename)
     nEvents = simTree->GetEntries();
 
     geom = new MCGeometry();
+    optionInductionSignal = 1; // default draw positive signal only
+
     InitBranchAddress();
     InitHistograms();
 }
@@ -183,8 +185,19 @@ void MCEvent::FillPixel(int yView, int xView)
                 double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
                 // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
                 int weight = adcs[i_tdc];
-                if (weight>0) {
-                    h->Fill(x, y, weight);
+                if (yView == kZ) {
+                    if (weight>0) h->Fill(x, y, weight);
+                }
+                else {
+                    if (optionInductionSignal == 1) {
+                        if (weight>0) h->Fill(x, y, weight);
+                    }
+                    else if (optionInductionSignal == -1) {
+                        if (weight<0) h->Fill(x, y, -weight);
+                    }
+                    else if (optionInductionSignal == 0) {
+                        h->Fill(x, y, fabs(weight));
+                    }
                 }
             }
 

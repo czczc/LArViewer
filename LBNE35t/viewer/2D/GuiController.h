@@ -42,6 +42,7 @@ public:
     void SyncXaxis();
     void UpdateZaxis();
     void UpdatePalette(int id);
+    void UpdateInductionSig(int id);
     void SiblingSelected(int id);
     void ParentOrDaughterSelected(int id);
     void HandleMenu(int id);
@@ -64,7 +65,6 @@ public:
     TCanvas *can;
 
     int currentEvent;
-    int currentPalette;
     int xMin_now, xMax_now;
 
     TLine* trackLineZ;
@@ -76,7 +76,9 @@ public:
 
     map<int, TGString> pdgMap;
 
+    int currentPalette;
     int currentTheme;
+    int currentInductionSig;
 
 };
 

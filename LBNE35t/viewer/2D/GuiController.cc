@@ -33,7 +33,10 @@ using namespace std;
 GuiController::GuiController(const TGWindow *p, int w,int h)
 {
     InitPDGMap();
+    currentPalette = 1;  // dark rainbow
     currentTheme = 0; // night theme
+    currentInductionSig = 0;  // positive signal
+
 
     trackLineZ = new TLine(0,0,0,0);
     trackLineZ->SetLineColor(kRed);
@@ -73,7 +76,6 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
     event = new MCEvent(fi.fFilename);
     geom = event->geom;
     currentEvent = 0;
-    currentPalette = 1;
     xMin_now = 0; 
     xMax_now = 3200;
     Reload();
@@ -100,6 +102,7 @@ void GuiController::InitConnections()
     cw->xrangeButton->Connect("Clicked()", "GuiController", this, "SyncXaxis()");
     cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
     cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
+    cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
     cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "SiblingSelected(int)");
     cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
     cw->fParentTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
@@ -108,9 +111,6 @@ void GuiController::InitConnections()
     can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
     can->GetPad(3)->Connect("RangeChanged()", "GuiController", this, "SyncRangeVT()");
 
-    // cw->fZTSlider->SetRange(-1, event->hPixelZT->GetMaximum());
-    // cw->fZTSlider->SetPosition(-1, event->hPixelZT->GetMaximum());
-    // cw->fZTSlider->Connect("Released()", "GuiController", this, "UpdateZRangeZT()");
 }
 
 void GuiController::AutoZoom()
@@ -215,6 +215,18 @@ void GuiController::UpdatePalette(int id)
 
     Modified();
     cout << "changing theme: " << id << endl;
+}
+
+void GuiController::UpdateInductionSig(int id)
+{
+    if (id == currentInductionSig) return;
+         if (id == 1) event->optionInductionSignal = 1;
+    else if (id == 2) event->optionInductionSignal = -1;
+    else if (id == 3) event->optionInductionSignal = 0;
+    currentInductionSig = id;
+
+    Reload();
+    cout << "changing induction signal: " << id << endl;
 }
 
 void GuiController::SetTheme(int theme)
