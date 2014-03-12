@@ -44,6 +44,7 @@ public:
     void UpdatePalette(int id);
     void UpdateInductionSig(int id);
     void UpdateAPA(int id);
+    void UpdateShowMC();
     void SiblingSelected(int id);
     void ParentOrDaughterSelected(int id);
     void HandleMenu(int id);
@@ -51,6 +52,7 @@ public:
     void InitTracksList();
     void AutoZoom(TH2F* hist, bool zoomY=true);
     void DrawTrack(int id);
+    void HideTrack();
     void SetTheme(int theme);
 
     // utilities
@@ -80,6 +82,8 @@ public:
     int currentPalette;
     int currentTheme;
     int currentInductionSig;
+    bool currentShowMC;
+    int currentTrackId;
 
 };
 

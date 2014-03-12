@@ -15,6 +15,7 @@
 #include "TGListBox.h"
 #include "TGString.h"
 #include "TGDoubleSlider.h"
+#include "TGLabel.h"
 
 #include "TCanvas.h"
 #include "TPad.h"
@@ -25,6 +26,7 @@
 #include "TLorentzVector.h"
 #include "TLine.h"
 #include "TMarker.h"
+#include "TList.h"
 
 #include <exception>
 #include <iostream>
@@ -36,7 +38,8 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
     currentPalette = 1;  // dark rainbow
     currentTheme = 0; // night theme
     currentInductionSig = 0;  // positive signal
-
+    currentShowMC = false;  // do not show MC
+    currentTrackId = 1;  // first track
 
     trackLineZ = new TLine(0,0,0,0);
     trackLineZ->SetLineColor(kRed);
@@ -104,6 +107,7 @@ void GuiController::InitConnections()
     cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
     cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
     cw->apaButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateAPA(int)");
+    cw->showMCButton->Connect("Clicked()", "GuiController", this, "UpdateShowMC()");
 
     cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "SiblingSelected(int)");
     cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
@@ -243,6 +247,21 @@ void GuiController::UpdateAPA(int id)
 }
 
 
+void GuiController::UpdateShowMC()
+{
+    if (cw->showMCButton->IsDown()) {
+        if (currentShowMC == true) return;
+        currentShowMC = true;
+        SiblingSelected(currentTrackId);
+    }
+    else {
+        if (currentShowMC == false) return;
+        currentShowMC = false;
+        HideTrack();
+    }
+
+}
+
 void GuiController::SetTheme(int theme)
 {
     if (theme == 0) {
@@ -260,6 +279,7 @@ void GuiController::SetTheme(int theme)
 
 void GuiController::Modified()
 {   
+
     can->GetPad(1)->Modified();
     // can->GetPad(1)->Update();
     can->GetPad(2)->Modified();
@@ -344,6 +364,49 @@ void GuiController::DrawTrack(int id)
     Modified();
 }
 
+void GuiController::HideTrack()
+{
+    float faraway = -1000.;
+    trackLineZ->SetX1(faraway);
+    trackLineZ->SetY1(faraway);
+    trackLineZ->SetX2(faraway);
+    trackLineZ->SetY2(faraway);
+
+    trackStartPointZ->SetX(faraway);
+    trackStartPointZ->SetY(faraway);
+
+    can->cd(1);
+    trackLineZ->Draw();
+    trackStartPointZ->Draw();
+
+
+    trackLineU->SetX1(faraway);
+    trackLineU->SetY1(faraway);
+    trackLineU->SetX2(faraway);
+    trackLineU->SetY2(faraway);
+
+    trackStartPointU->SetX(faraway);
+    trackStartPointU->SetY(faraway);
+
+    can->cd(2);
+    trackLineU->Draw();
+    trackStartPointU->Draw();
+
+    trackLineV->SetX1(faraway);
+    trackLineV->SetY1(faraway);
+    trackLineV->SetX2(faraway);
+    trackLineV->SetY2(faraway);
+
+    trackStartPointV->SetX(faraway);
+    trackStartPointV->SetY(faraway);
+
+    can->cd(3);
+    trackLineV->Draw();
+    trackStartPointV->Draw();
+
+    Modified();
+}
+
 
 void GuiController::Prev()
 {
@@ -377,6 +440,8 @@ void GuiController::Reload()
     event->PrintInfo();
  
     InitTracksList();
+    cw->showMCButton->SetState(kButtonUp);
+    UpdateShowMC();
     DrawPixels();
 }
 
@@ -385,17 +450,23 @@ void GuiController::InitTracksList()
 {   
 
     cw->fSiblingTracksListBox->RemoveAll();
+    cw->fParentTracksListBox->RemoveAll();
+    cw->fDaughterTracksListBox->RemoveAll();
     TGString name;
     name.Form("%s (%.1f)", PDGName(event->mc_pdg[0]).Data(), KE(event->mc_startMomentum[0])*1000);
     int id = event->mc_id[0];
+    currentTrackId = id;
     cw->fSiblingTracksListBox->AddEntry(name, id);
-    SiblingSelected(id);
+    // SiblingSelected(id);
 }
 
 void GuiController::SiblingSelected(int id)
 {
-    cw->fSiblingTracksListBox->Select(id);
+    currentTrackId = id;
+    cw->showMCButton->SetState(kButtonDown);
+    currentShowMC = true;
 
+    cw->fSiblingTracksListBox->Select(id);
     cw->fDaughterTracksListBox->RemoveAll();
     int i = event->trackIndex[id];
     int nDaughter = (*(event->mc_daughters)).at(i).size();

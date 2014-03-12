@@ -109,12 +109,15 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fDaughterTracksFrame = new TGVerticalFrame(fTracksFrame, w, hTracks);
     fParentSiblingTracksFrame = new TGVerticalFrame(fTracksFrame, w, hTracks);
     
+
+
     TGLabel *labelDaughterTracks = new TGLabel(fDaughterTracksFrame, "Children (MeV)");
     fDaughterTracksFrame->AddFrame(labelDaughterTracks, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     
     fDaughterTracksListBox = new TGListBox(fDaughterTracksFrame);
     fDaughterTracksFrame->AddFrame(fDaughterTracksListBox, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     fDaughterTracksListBox->Resize(w/2, hTracks-40);
+
 
     TGLabel *labelParentTracks = new TGLabel(fParentSiblingTracksFrame, "Parents (MeV)");
     fParentSiblingTracksFrame->AddFrame(labelParentTracks, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
@@ -129,13 +132,16 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     
     fSiblingTracksListBox = new TGListBox(fParentSiblingTracksFrame);
     fParentSiblingTracksFrame->AddFrame(fSiblingTracksListBox, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
-    fSiblingTracksListBox->Resize(w/2, hTracks-100);
+    fSiblingTracksListBox->Resize(w/2, hTracks-120);
+
+    showMCButton = new TGCheckButton(fParentSiblingTracksFrame, "Show MC ");
+    fParentSiblingTracksFrame->AddFrame(showMCButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    showMCButton->SetState(kButtonUp);
 
     fTracksFrame->AddFrame(fParentSiblingTracksFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     fTracksFrame->AddFrame(fDaughterTracksFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     fMCGroupFrame->AddFrame(fTracksFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     AddFrame(fMCGroupFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
-
 
     // Palette Selection
     fColorScaleFrame = new TGHorizontalFrame(this, w, 100);

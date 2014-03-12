@@ -10,6 +10,7 @@ class TGRadioButton;
 class TGListBox;
 class TGDoubleVSlider;
 class TGCheckButton;
+class TGLabel;
 
 class ControlWindow: public TGVerticalFrame
 {
@@ -48,8 +49,6 @@ public:
     TGRadioButton      *grayPaletteButton;
     TGRadioButton      *summerPaletteButton;
     TGRadioButton      *grayinvPaletteButton;
-    // TGDoubleVSlider    *fZTSlider;
-
 
     TGGroupFrame       *fMCGroupFrame;
     TGHorizontalFrame  *fTracksFrame;
@@ -59,7 +58,7 @@ public:
     TGListBox          *fDaughterTracksListBox;
     TGListBox          *fParentTracksListBox;
     TGListBox          *fSiblingTracksListBox;
-
+    TGCheckButton      *showMCButton;
 
     ClassDef(ControlWindow, 0)
 };
