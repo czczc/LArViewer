@@ -45,8 +45,7 @@ public:
     void UpdateInductionSig(int id);
     void UpdateAPA(int id);
     void UpdateShowMC();
-    void SiblingSelected(int id);
-    void ParentOrDaughterSelected(int id);
+    void MCTrackSelected(int id);
     void HandleMenu(int id);
 
     void InitTracksList();

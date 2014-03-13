@@ -98,6 +98,7 @@ void MCEvent::Reset()
     trackIndex.clear();
     trackParents.clear();
     trackChildren.clear();
+    trackSiblings.clear();
 
     raw_NZchannels = 0;
     raw_NUchannels = 0;
@@ -239,6 +240,22 @@ void MCEvent::ProcessTracks()
             children.push_back(trackIndex[(*mc_daughters).at(i).at(j)]);
         }
         trackChildren.push_back(children);
+
+    }
+    for (int i=0; i<mc_Ntrack; i++) {
+        vector<int> siblings;
+        if (mc_mother[i] == 0) {
+            siblings.push_back(i);
+        }
+        else {
+            // siblings are simply children of the mother
+            int mother = trackIndex[mc_mother[i]];
+            int nSiblings = trackChildren.at(mother).size();
+            for (int j=0; j<nSiblings; j++) {
+                siblings.push_back(trackChildren.at(mother).at(j));
+            }
+        }
+        trackSiblings.push_back(siblings);
     }
 
 }

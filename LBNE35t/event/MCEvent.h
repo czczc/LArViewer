@@ -62,6 +62,7 @@ public:
     map<int, int> trackIndex;
     std::vector<std::vector<int> > trackParents;
     std::vector<std::vector<int> > trackChildren;
+    std::vector<std::vector<int> > trackSiblings;
 
 
     // histograms

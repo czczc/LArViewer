@@ -109,9 +109,9 @@ void GuiController::InitConnections()
     cw->apaButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateAPA(int)");
     cw->showMCButton->Connect("Clicked()", "GuiController", this, "UpdateShowMC()");
 
-    cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "SiblingSelected(int)");
-    cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
-    cw->fParentTracksListBox->Connect("Selected(int)", "GuiController", this, "ParentOrDaughterSelected(int)");
+    cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "MCTrackSelected(int)");
+    cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "MCTrackSelected(int)");
+    cw->fParentTracksListBox->Connect("Selected(int)", "GuiController", this, "MCTrackSelected(int)");
 
     can->GetPad(1)->Connect("RangeChanged()", "GuiController", this, "SyncRangeZT()");
     can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
@@ -252,7 +252,7 @@ void GuiController::UpdateShowMC()
     if (cw->showMCButton->IsDown()) {
         if (currentShowMC == true) return;
         currentShowMC = true;
-        SiblingSelected(currentTrackId);
+        MCTrackSelected(currentTrackId);
     }
     else {
         if (currentShowMC == false) return;
@@ -458,16 +458,14 @@ void GuiController::InitTracksList()
     int id = event->mc_id[0];
     currentTrackId = id;
     cw->fSiblingTracksListBox->AddEntry(name, id);
-    // SiblingSelected(id);
 }
 
-void GuiController::SiblingSelected(int id)
+void GuiController::MCTrackSelected(int id)
 {
     currentTrackId = id;
     cw->showMCButton->SetState(kButtonDown);
     currentShowMC = true;
 
-    cw->fSiblingTracksListBox->Select(id);
     cw->fDaughterTracksListBox->RemoveAll();
     int i = event->trackIndex[id];
     int nDaughter = (*(event->mc_daughters)).at(i).size();
@@ -490,21 +488,22 @@ void GuiController::SiblingSelected(int id)
         // cout << name.Data() << event->mc_id[idx] << endl;
     }
     cw->fParentTracksListBox->Layout();
-    DrawTrack(id);
-    cout << "sibling selected, id: " << id << ", daughters: " << nDaughter << endl;
-}
 
-
-void GuiController::ParentOrDaughterSelected(int id)
-{
     cw->fSiblingTracksListBox->RemoveAll();
-    int i = event->trackIndex[id];
-    TGString name;
-    name.Form("%s (%.1f)", PDGName(event->mc_pdg[i]).Data(), KE(event->mc_startMomentum[i])*1000);
-    cw->fSiblingTracksListBox->AddEntry(name, event->mc_id[i]);
-    SiblingSelected(id);
+    int nSiblings = event->trackSiblings.at(i).size();
+    for (int j=0; j<nSiblings; j++) {
+        int idx = event->trackSiblings.at(i).at(j);
+        TGString name;
+        name.Form("%s (%.1f)", PDGName(event->mc_pdg[idx]).Data(), KE(event->mc_startMomentum[idx])*1000);
+        cw->fSiblingTracksListBox->AddEntry(name, event->mc_id[idx]);
+        // cout << name.Data() << event->mc_id[idx] << endl;
+    }
+    cw->fSiblingTracksListBox->Layout();
 
-    cout << "parent or daughter selected, id: " << id << endl;
+
+    cw->fSiblingTracksListBox->Select(id);
+    DrawTrack(id);
+    cout << "MC Track, id: " << id << ", daughters: " << nDaughter << endl;
 }
 
 
