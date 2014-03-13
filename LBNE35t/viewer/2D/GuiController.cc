@@ -162,8 +162,8 @@ void GuiController::UpdateZaxis()
     int ut = cw->utColorEntry->GetNumber();
     int vt = cw->vtColorEntry->GetNumber();
 
-    int min = -1;
-    if (currentTheme == 1) min = 0;
+    int min = 0;
+    // if (currentTheme == 1) min = 0;
     event->hPixelZT->GetZaxis()->SetRangeUser(min, zt);
     event->hPixelUT->GetZaxis()->SetRangeUser(min, ut);
     event->hPixelVT->GetZaxis()->SetRangeUser(min, vt);
@@ -264,16 +264,17 @@ void GuiController::UpdateShowMC()
 
 void GuiController::SetTheme(int theme)
 {
-    if (theme == 0) {
-        event->hPixelZT->SetMinimum(-1);
-        event->hPixelUT->SetMinimum(-1);
-        event->hPixelVT->SetMinimum(-1);
-    }
-    else {
-        event->hPixelZT->SetMinimum(0);
-        event->hPixelUT->SetMinimum(0);
-        event->hPixelVT->SetMinimum(0);
-    }
+    // if (theme == 0) {
+    //     // by default, empty bins are not painted, which is overwritten if there is negative bin content
+    //     // event->hPixelZT->SetMinimum(-1);
+    //     // event->hPixelUT->SetMinimum(-1);
+    //     // event->hPixelVT->SetMinimum(-1);
+    // }
+    // else {
+    //     event->hPixelZT->SetMinimum(0);
+    //     event->hPixelUT->SetMinimum(0);
+    //     event->hPixelVT->SetMinimum(0);
+    // }
     vw->SetTheme(theme);
 }
 

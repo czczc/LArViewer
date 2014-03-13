@@ -147,9 +147,9 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fColorScaleFrame = new TGHorizontalFrame(this, w, 100);
     paletteButtonGroup = new TGButtonGroup(fColorScaleFrame, "Color Theme", kVerticalFrame); 
     rainbowPaletteButton = new TGRadioButton(paletteButtonGroup, "Rainbow (Night)"); 
-    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Night)"); 
-    summerPaletteButton = new TGRadioButton(paletteButtonGroup, "Summer (Day)"); 
-    grayinvPaletteButton = new TGRadioButton(paletteButtonGroup, "Gray (Day)"); 
+    grayPaletteButton = new TGRadioButton(paletteButtonGroup, "Film (Night)"); 
+    summerPaletteButton = new TGRadioButton(paletteButtonGroup, "Sea (Day)"); 
+    grayinvPaletteButton = new TGRadioButton(paletteButtonGroup, "Ink (Day)"); 
     rainbowPaletteButton->SetState(kButtonDown);
 
     // fZTSlider = new TGDoubleVSlider(fColorScaleFrame, 90, 2, -1, kVerticalFrame, GetDefaultFrameBackground(), kTRUE);
