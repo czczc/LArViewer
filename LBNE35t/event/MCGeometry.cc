@@ -127,7 +127,7 @@ double MCGeometry::ProjectionV(int tpc, int wire)
     // const double c = TMath::Cos(angle);
 
     // all numbers are in cm;
-    double pitch = 0.4888;  // vertical distance between wires
+    double pitch = 0.5012;  // vertical distance between wires
     const double tpc1start = -73.5662;  // -(153.282-49.2436)*s
     const double tpc3start = -211.540;  // -(113.243+85.2438+153.282-52.6064)*s
     const double tpc5start = -37.0262;  // -(153.282-100.919)*s

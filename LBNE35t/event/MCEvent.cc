@@ -74,7 +74,7 @@ void MCEvent::InitHistograms()
 
     hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
     hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 510, -168, -168+510*0.4888);
-    hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.4888);
+    hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.5012);
 
     hPixelZT->GetXaxis()->SetTitle("x [cm]");
     hPixelUT->GetXaxis()->SetTitle("x [cm]");
