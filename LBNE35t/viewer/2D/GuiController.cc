@@ -17,6 +17,8 @@
 #include "TGDoubleSlider.h"
 #include "TGLabel.h"
 
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 #include "TCanvas.h"
 #include "TPad.h"
 #include "TFrame.h"
@@ -34,7 +36,9 @@ using namespace std;
 
 GuiController::GuiController(const TGWindow *p, int w,int h)
 {
-    InitPDGMap();
+    // InitPDGMap();
+    dbPDG = new TDatabasePDG();
+
     currentPalette = 1;  // dark rainbow
     currentTheme = 0; // night theme
     currentInductionSig = 0;  // positive signal
@@ -581,63 +585,32 @@ double GuiController::KE(float* momentum)
 }
 
 
-void GuiController::InitPDGMap()
-{
-    pdgMap[321]   = "K+";
-    pdgMap[-321]  = "K-";
-    pdgMap[130]   = "K0long";
-    pdgMap[310]   = "K0short";
-    pdgMap[310]   = "K0short";
-
-    pdgMap[221]   = "eta";
-    pdgMap[2212]  = "p";
-    pdgMap[-2212] = "~p";
-    pdgMap[2112]  = "n";
-    pdgMap[-2112] = "~n";
-
-    pdgMap[113]   = "rho";
-    pdgMap[211]   = "pi+";
-    pdgMap[-211]  = "pi-";
-    pdgMap[111]   = "pi0";
-    
-    pdgMap[22]    = "gamma";
-    pdgMap[-11]   = "e+";
-    pdgMap[11]    = "e-";
-    pdgMap[-13]   = "mu+";
-    pdgMap[13]    = "mu-";
-    pdgMap[-15]   = "tau+";
-    pdgMap[15]    = "tau-";
- 
-    pdgMap[12]    = "nu_e";
-    pdgMap[-12]   = "~nu_e";
-    pdgMap[14]    = "nu_mu";
-    pdgMap[-14]   = "~nu_mu";
-
-}
-
-
 TGString GuiController::PDGName(int pdg)
 {   
-    try {
-        return pdgMap.at(pdg);
-    } catch (exception& e) {
+    TParticlePDG *p = dbPDG->GetParticle(pdg);
+    if (p == 0) {
         if (pdg>1e9) {
             int z = (pdg - 1e9) / 10000;
             int a = (pdg - 1e9 - z*1e4) / 10;
             TGString name;
             if (z == 18) name = "Ar";   
+
             else if (z == 17) name = "Cl";
+            else if (z == 19) name = "Ca";
             else if (z == 16) name = "S";
             else if (z == 15) name = "P";
-            else if (z == 19) name = "Ca";
+            else if (z == 14) name = "Si";
             else if (z == 1) name = "H";
             else if (z == 2) name = "He";
+
             else return pdg;
             return Form("%s-%i", name.Data(), a);
         }
         return pdg;
     }
-    
+    else {
+        return p->GetName();
+    }
 }
 
 

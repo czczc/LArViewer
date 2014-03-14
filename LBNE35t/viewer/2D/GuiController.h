@@ -16,6 +16,7 @@ class TCanvas;
 class TH2F;
 class TLine;
 class TMarker;
+class TDatabasePDG;
 
 class GuiController
 {
@@ -27,7 +28,6 @@ public:
     void Open(const char* filename);
     void Reload();
     void InitConnections();
-    void InitPDGMap();
     void DrawPixels();
     void Modified();
 
@@ -76,7 +76,7 @@ public:
     TLine* trackLineV;
     TMarker* trackStartPointV;
 
-    map<int, TGString> pdgMap;
+    TDatabasePDG *dbPDG;
 
     int currentPalette;
     int currentTheme;
