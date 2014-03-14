@@ -3,6 +3,11 @@
 
 #include "RQ_OBJECT.h"
 
+class TGTextButton;
+class TGNumberEntryField;
+class TGMainFrame;
+class MCEvent;
+
 class Gui3DController
 {
     RQ_OBJECT("3DCotroller")
@@ -10,11 +15,25 @@ public:
     Gui3DController();
     virtual ~Gui3DController();
 
-    void Run();
-    void AddTracks();
-
     void InitGeometry();
     void InitNavigationFrame();
+    void InitEvent();
+    void Reload();
+    void AddTracks();
+    void Run();
+
+    // slots
+    void Prev();
+    void Next();
+
+    MCEvent *event;
+    int currentEvent;
+
+    // GUIs
+    TGMainFrame        *frmMain;
+    TGTextButton       *prevButton, *nextButton;
+    TGNumberEntryField *eventEntry; 
+
 };
 
 #endif
