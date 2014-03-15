@@ -16,6 +16,10 @@ MCEvent::MCEvent(){}
 
 MCEvent::MCEvent(const char* filename)
 {
+    raw_wfADC = new std::vector<std::vector<int> >;
+    raw_wfTDC = new std::vector<std::vector<int> >;
+    mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
+
     rootFile = new TFile(filename);
     simTree = (TTree*)rootFile->Get("/Event/Sim");
     nEvents = simTree->GetEntries();
@@ -30,14 +34,17 @@ MCEvent::MCEvent(const char* filename)
 
 MCEvent::~MCEvent()
 {
+    delete hPixelZT;  // delete histogram, then close file
+    delete hPixelUT;
+    delete hPixelVT;
+    delete raw_wfADC;
+    delete raw_wfTDC;
+    delete mc_daughters;
+
     rootFile->Close();
     delete rootFile;
-
     delete geom;
     
-    delete hPixelZT;
-    delete hPixelUT;
-    delete hPixelVT;    
 }
 
 void MCEvent::InitBranchAddress()
@@ -95,6 +102,10 @@ void MCEvent::GetEntry(int entry)
 
 void MCEvent::Reset()
 {
+    (*raw_wfADC).clear();
+    (*raw_wfTDC).clear();
+    (*mc_daughters).clear();
+
     trackIndex.clear();
     trackParents.clear();
     trackChildren.clear();
