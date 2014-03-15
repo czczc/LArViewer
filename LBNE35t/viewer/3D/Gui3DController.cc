@@ -29,7 +29,8 @@ using namespace std;
 Gui3DController::Gui3DController()
 {
     dbPDG = new TDatabasePDG();
-
+    list = 0;
+    
     TEveManager::Create();
     InitGeometry();
     InitNavigationFrame();
@@ -137,6 +138,8 @@ void Gui3DController::AddTracks()
     else {
         list = new TEveTrackList();
         list->GetPropagator()->SetStepper(TEveTrackPropagator::kRungeKutta);
+        list->GetPropagator()->SetMaxR(1e4);
+        list->GetPropagator()->SetMaxZ(1e4);
         gEve->AddElement(list);
     }    
     TString name;
