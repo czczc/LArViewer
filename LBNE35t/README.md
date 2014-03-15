@@ -1,11 +1,11 @@
 # Display LBNE 35ton Events
 
-## How to Run
+## 2D Event Display
 
     cd scripts
     root -l run.C
 
-## See the Geometry
+## 3D Event Display
     
-    cd Geometry
-    root -l view.C
+    cd scripts
+    root -l run3d.C
