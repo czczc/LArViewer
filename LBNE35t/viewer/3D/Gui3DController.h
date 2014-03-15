@@ -6,6 +6,9 @@
 class TGTextButton;
 class TGNumberEntryField;
 class TGMainFrame;
+class TDatabasePDG;
+class TEveTrackList;
+
 class MCEvent;
 
 class Gui3DController
@@ -28,6 +31,8 @@ public:
 
     MCEvent *event;
     int currentEvent;
+    TDatabasePDG *dbPDG;
+    TEveTrackList *list;
 
     // GUIs
     TGMainFrame        *frmMain;

@@ -18,6 +18,8 @@
 #include "TGNumberEntry.h"
 #include "TGFileDialog.h"
 
+#include "TDatabasePDG.h"
+#include "TParticlePDG.h"
 #include "TString.h"
 #include "TColor.h"
 
@@ -26,6 +28,8 @@ using namespace std;
 
 Gui3DController::Gui3DController()
 {
+    dbPDG = new TDatabasePDG();
+
     TEveManager::Create();
     InitGeometry();
     InitNavigationFrame();
@@ -43,7 +47,7 @@ Gui3DController::~Gui3DController()
 void Gui3DController::InitEvent()
 {
     const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
-    static TString dir("../..");
+    static TString dir("../data");
     TGFileInfo fi;
     fi.fFileTypes = filetypes;
     fi.fIniDir    = StrDup(dir);
@@ -58,7 +62,7 @@ void Gui3DController::InitEvent()
 
 void Gui3DController::InitGeometry()
 {
-    TGeoManager::Import("../../Geometry/lbne35t4apa.gdml");
+    TGeoManager::Import("../Geometry/lbne35t4apa.gdml");
     gGeoManager->DefaultColors();
     TGeoNode* world = gGeoManager->GetTopNode();
     TGeoNode* cyro = world->GetDaughter(0)->GetDaughter(0);
@@ -84,7 +88,7 @@ void Gui3DController::InitGeometry()
 
     }
 
-    TEveGeoTopNode* top = new TEveGeoTopNode(gGeoManager, cyro);
+    TEveGeoTopNode* top = new TEveGeoTopNode(gGeoManager, world);
     gEve->AddGlobalElement(top);
 }
 
@@ -127,34 +131,48 @@ void Gui3DController::InitNavigationFrame()
 
 void Gui3DController::AddTracks()
 {
-    TEveTrackList *list = new TEveTrackList();
-    list->SetName("LBNE");
-    list->GetPropagator()->SetStepper(TEveTrackPropagator::kRungeKutta);
-    
+    if (list) {
+        list->RemoveElements();
+    }
+    else {
+        list = new TEveTrackList();
+        list->GetPropagator()->SetStepper(TEveTrackPropagator::kRungeKutta);
+        gEve->AddElement(list);
+    }    
+    TString name;
+    name.Form("Event: %i", currentEvent);
+    list->SetName(name.Data());
 
-    TEveRecTrackD *rc = new TEveRecTrackD();
-    rc->fV.Set(100, 20, 20);
-    rc->fP.Set(100, 20, 20);
-    TEveTrack* track = new TEveTrack(rc, list->GetPropagator());
-
-    // t = new TParticle(-13, 0, 0, 0, 0, 0, 0, 0, 1, 2, 100, 20, 200, 200);
-    // TEveTrack* track = new TEveTrack(t, 1, list->GetPropagator());
-    
-    track->SetName("test track");
-    track->SetLineColor(kMagenta);
-
-
-    TEvePathMarkD* pm1 = new TEvePathMarkD(TEvePathMarkD::kReference);
-    pm1->fV.Set(100, 20, 200);
-    track->AddPathMark(*pm1);
-    TEvePathMarkD* pm2 = new TEvePathMarkD(TEvePathMarkD::kReference);
-    pm2->fV.Set(100, 100, 200);
-    track->AddPathMark(*pm2);
-
-    gEve->AddElement(list);
-    list->AddElement(track);
-
-    track->MakeTrack();
+    int mc_Ntrack = event->mc_Ntrack;  // number of tracks in MC
+    TEveRecTrackD *rc = 0;
+    TEveTrack* track = 0;
+    TEvePathMarkD* pm = 0;
+    int colors[6] = {kMagenta, kGreen, kYellow, kRed, kCyan, kWhite};
+    int nTrackShowed = 0;
+    for (int i=0; i<mc_Ntrack; i++) {
+        int mc_id = event->mc_id[i];
+        int mc_pdg = event->mc_pdg[i];
+        TParticlePDG *p = dbPDG->GetParticle(mc_pdg);
+        if (p == 0) {
+            continue; // skip unknown particles
+        }
+        if ( fabs(p->Charge()) < 1e-2 ) {
+            continue;  // skip neutral particles
+        }
+        rc = new TEveRecTrackD();
+        rc->fV.Set(event->mc_startXYZT[i][0], event->mc_startXYZT[i][1], event->mc_startXYZT[i][2]);
+        track = new TEveTrack(rc, list->GetPropagator());
+        TString s;
+        s.Form("%i: %s", mc_id, p->GetName());
+        track->SetName(s.Data());
+        track->SetLineColor( colors[nTrackShowed % 6] );
+        pm = new TEvePathMarkD(TEvePathMarkD::kReference);
+        pm->fV.Set(event->mc_endXYZT[i][0], event->mc_endXYZT[i][1], event->mc_endXYZT[i][2]);
+        track->AddPathMark(*pm);
+        list->AddElement(track);
+        track->MakeTrack();
+        nTrackShowed++;
+    }
 
 }
 
@@ -203,4 +221,6 @@ void Gui3DController::Reload()
     event->GetEntry(currentEvent);
     // event->PrintInfo(1);
     event->PrintInfo();
+    AddTracks();
+    gEve->DoRedraw3D();
 }

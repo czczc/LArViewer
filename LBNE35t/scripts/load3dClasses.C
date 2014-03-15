@@ -2,11 +2,13 @@
     TString include = ".include ";
     TString load = ".L ";
 
-    TString prefix = "../../event";
+    TString prefix = "../event";
     gROOT->ProcessLine( include + prefix );
+    gROOT->ProcessLine( load + prefix + "/MCChannel.cc+" );
+    gROOT->ProcessLine( load + prefix + "/MCGeometry.cc+" );
     gROOT->ProcessLine( load + prefix + "/MCEvent.cc+" );
 
-    TString prefix = ".";
+    TString prefix = "../viewer/3D";
     gROOT->ProcessLine( include + prefix );
     gROOT->ProcessLine( load + prefix + "/Gui3DController.cc+" );
 
