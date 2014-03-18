@@ -23,6 +23,7 @@ public:
     void InitEvent();
     void Reload();
     void AddTracks();
+    void ProjectionView();
     void Run();
 
     // slots
