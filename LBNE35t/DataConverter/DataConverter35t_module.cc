@@ -55,7 +55,7 @@
 #define MAX_TPC 8
 #define MAX_PLANE 3
 #define MAX_CHANNEL 1992
-#define MAX_TRACKS 1000
+#define MAX_TRACKS 2000
 
 using namespace std;
 

@@ -17,7 +17,7 @@ public:
 
     enum LIMITS {
         MAX_CHANNEL = 1992,
-        MAX_TRACKS = 1000,
+        MAX_TRACKS = 2000,
     };
 
     enum VIEW {
