@@ -34,6 +34,7 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     displayButtonGroup = new TGButtonGroup(fDisplayFrame, "Display Properties", kHorizontalFrame); 
     fDisplayFrame->AddFrame(displayButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
     rawButton = new TGRadioButton(displayButtonGroup,  "Raw    "); 
+    calibButton = new TGRadioButton(displayButtonGroup, "Calib    "); 
     hitsButton = new TGRadioButton(displayButtonGroup, "Hits    "); 
     rawButton->SetState(kButtonDown);
 

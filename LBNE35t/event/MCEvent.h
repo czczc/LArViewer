@@ -30,8 +30,9 @@ public:
 
     enum DISPLAY {
         kRAW = 1,
-        kHITS = 2,
-        kTRACK = 3,
+        kCALIB = 2,
+        kHITS = 3,
+        kTRACK = 4,
     };
 
     int nEvents;
@@ -47,6 +48,11 @@ public:
     int raw_time[MAX_CHANNEL];  // hit channel time (simple alg); size == raw_Nhit
     std::vector<std::vector<int> > *raw_wfADC;
     std::vector<std::vector<int> > *raw_wfTDC;
+
+    int calib_Nhit;  // number of hit channels
+    int calib_channelId[MAX_CHANNEL];  // hit channel id; size == raw_Nhit
+    std::vector<std::vector<int> > *calib_wfADC;
+    std::vector<std::vector<int> > *calib_wfTDC;
 
     int mc_Ntrack;  // number of tracks in MC
     int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack

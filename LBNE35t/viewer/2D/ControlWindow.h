@@ -25,6 +25,7 @@ public:
     TGHorizontalFrame  *fDisplayFrame; 
     TGButtonGroup      *displayButtonGroup;
     TGRadioButton      *rawButton; 
+    TGRadioButton      *calibButton; 
     TGRadioButton      *hitsButton;
 
     TGGroupFrame       *fZoomControlFrame;

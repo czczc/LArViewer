@@ -18,6 +18,8 @@ MCEvent::MCEvent(const char* filename)
 {
     raw_wfADC = new std::vector<std::vector<int> >;
     raw_wfTDC = new std::vector<std::vector<int> >;
+    calib_wfADC = new std::vector<std::vector<int> >;
+    calib_wfTDC = new std::vector<std::vector<int> >;
     mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
 
     rootFile = new TFile(filename);
@@ -40,6 +42,8 @@ MCEvent::~MCEvent()
     delete hPixelVT;
     delete raw_wfADC;
     delete raw_wfTDC;
+    delete calib_wfADC;
+    delete calib_wfTDC;
     delete mc_daughters;
 
     rootFile->Close();
@@ -60,6 +64,11 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("raw_time"     , &raw_time);
     simTree->SetBranchAddress("raw_wfADC"    , &raw_wfADC);
     simTree->SetBranchAddress("raw_wfTDC"    , &raw_wfTDC);
+
+    simTree->SetBranchAddress("calib_Nhit"     , &calib_Nhit);
+    simTree->SetBranchAddress("calib_channelId", &calib_channelId);
+    simTree->SetBranchAddress("calib_wfADC"    , &calib_wfADC);
+    simTree->SetBranchAddress("calib_wfTDC"    , &calib_wfTDC);
 
     simTree->SetBranchAddress("mc_Ntrack"       , &mc_Ntrack);
     simTree->SetBranchAddress("mc_id"           , &mc_id);
@@ -110,6 +119,8 @@ void MCEvent::Reset()
 {
     (*raw_wfADC).clear();
     (*raw_wfTDC).clear();
+    (*calib_wfADC).clear();
+    (*calib_wfTDC).clear();
     (*mc_daughters).clear();
 
     trackIndex.clear();
@@ -179,65 +190,121 @@ void MCEvent::FillPixel(int yView, int xView)
     TH2F *h = _SetFillPixelInternal(yView, xView, nChannels, channels);
     if (!h) return;
     h->Reset();
-    for (int i=0; i<nChannels; i++) {
-        MCChannel channel = geom->fChannels[channels[i]];
-        // cout << yView << " View channel " << channels[i] << ": " << endl;
-        for (int j=0; j<channel.Nwires; j++) {
-            int wire = channel.wires[j];
-            int tpc = channel.tpcs[j];
-            // int plane = channel.planes[j];
+    if (optionDisplay == kRAW || optionDisplay == kCALIB) {
+        for (int i=0; i<nChannels; i++) {
+            MCChannel channel = geom->fChannels[channels[i]];
+            // cout << yView << " View channel " << channels[i] << ": " << endl;
+            for (int j=0; j<channel.Nwires; j++) {
+                int wire = channel.wires[j];
+                int tpc = channel.tpcs[j];
+                // int plane = channel.planes[j];
 
-            // skip short drift chamber
-            if (tpc % 2 == 0) continue; 
-            // only show designated APA's
-            if (!showAPA[(tpc-1)/2]) continue;
+                // skip short drift chamber
+                if (tpc % 2 == 0) continue; 
+                // only show designated APA's
+                if (!showAPA[(tpc-1)/2]) continue;
 
-            double y = (double)wire;
-            if (yView == kZ) {
-                // y = (double)wire;
-                y = geom->ProjectionZ(tpc, wire);
-                // cout << tpc << " " << wire << " " << y << endl;
-            }
-            else if (yView == kU) {
-                y = geom->ProjectionU(tpc, wire);
-            }
-            else if (yView == kV) {
-                y = geom->ProjectionV(tpc, wire);
-            }
+                double y = (double)wire;
+                if (yView == kZ) {
+                    // y = (double)wire;
+                    y = geom->ProjectionZ(tpc, wire);
+                    // cout << tpc << " " << wire << " " << y << endl;
+                }
+                else if (yView == kU) {
+                    y = geom->ProjectionU(tpc, wire);
+                }
+                else if (yView == kV) {
+                    y = geom->ProjectionV(tpc, wire);
+                }
 
-            if (optionDisplay == kRAW) {
-                int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
-                vector<int>& tdcs = (*raw_wfTDC).at(id);
-                vector<int>& adcs = (*raw_wfADC).at(id);
-                int size_tdc = tdcs.size();
-                for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
-                    // double x = tdcs[i_tdc];
-                    double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
-                    // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
-                    int weight = adcs[i_tdc];
-                    if (yView == kZ) {
-                        if (weight>0) h->Fill(x, y, weight);
+                if (optionDisplay == kRAW || optionDisplay == kCALIB) {
+                    int id = 0;
+                    vector<int>& tdcs = (*raw_wfTDC).at(id);
+                    vector<int>& adcs = (*raw_wfADC).at(id);
+                    int size_tdc = tdcs.size();
+
+                    if (optionDisplay == kRAW) {
+                        id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
+                        tdcs = (*raw_wfTDC).at(id);
+                        adcs = (*raw_wfADC).at(id);
+                        size_tdc = tdcs.size();
                     }
-                    else {
-                        if (optionInductionSignal == 1) {
+                    else {  // calib wire
+                        id = TMath::BinarySearch(calib_Nhit, calib_channelId, channel.channelNo);
+                        if (id>0) {
+                            tdcs = (*calib_wfTDC).at(id);
+                            adcs = (*calib_wfADC).at(id);
+                            size_tdc = tdcs.size();
+                        }
+                        else {
+                            size_tdc = 0;
+                        }
+                    }
+                    for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
+                        // double x = tdcs[i_tdc];
+                        double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
+                        // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+                        int weight = adcs[i_tdc];
+                        if (weight>1e4) {
+                            cout << weight << endl;
+                        }
+                        if (yView == kZ) {
                             if (weight>0) h->Fill(x, y, weight);
                         }
-                        else if (optionInductionSignal == -1) {
-                            if (weight<0) h->Fill(x, y, -weight);
-                        }
-                        else if (optionInductionSignal == 0) {
-                            h->Fill(x, y, fabs(weight));
+                        else {
+                            if (optionInductionSignal == 1) {
+                                if (weight>0) h->Fill(x, y, weight);
+                            }
+                            else if (optionInductionSignal == -1) {
+                                if (weight<0) h->Fill(x, y, -weight);
+                            }
+                            else if (optionInductionSignal == 0) {
+                                h->Fill(x, y, fabs(weight));
+                            }
                         }
                     }
                 }
             }
-            else if (optionDisplay == kHITS) {
-                int id = TMath::BinarySearch(no_hits, hit_channel, channel.channelNo);
-                double x = geom->ProjectionX(tpc, hit_peakT[id]);
-                h->Fill(x, y, hit_charge[id]);
-            }
-
         }
+    }
+    else if (optionDisplay == kHITS) {
+        for (int i=0; i<no_hits; i++) {
+            int channelId = hit_channel[i];
+            MCChannel channel = geom->fChannels[channelId];
+            int plane = channel.planes[0];
+            if ( ! ((yView == kU && plane == 0) || 
+                   (yView == kV && plane == 1) ||
+                   (yView == kZ && plane == 2))
+               ) {
+                continue; // skip other channels
+            }
+            for (int j=0; j<channel.Nwires; j++) {
+                int wire = channel.wires[j];
+                int tpc = channel.tpcs[j];
+                // int plane = channel.planes[j];
+
+                // skip short drift chamber
+                if (tpc % 2 == 0) continue; 
+                // only show designated APA's
+                if (!showAPA[(tpc-1)/2]) continue;
+
+                double y = (double)wire;
+                if (yView == kZ) {
+                    // y = (double)wire;
+                    y = geom->ProjectionZ(tpc, wire);
+                    // cout << tpc << " " << wire << " " << y << endl;
+                }
+                else if (yView == kU) {
+                    y = geom->ProjectionU(tpc, wire);
+                }
+                else if (yView == kV) {
+                    y = geom->ProjectionV(tpc, wire);
+                }
+                double x = geom->ProjectionX(tpc, hit_peakT[i]);
+                h->Fill(x, y, hit_charge[i]);
+            }
+        }
+
     }
     
 }
@@ -247,7 +314,7 @@ TH2F* MCEvent::_SetFillPixelInternal(int yView, int xView, int& nChannels, vecto
     TH2F *h = 0;
     if (yView == kZ && xView == kT) {
         h = hPixelZT;
-        if (optionDisplay == kRAW) {
+        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
            channels = raw_ZchannelId;
            nChannels = raw_NZchannels; 
        }
@@ -258,18 +325,18 @@ TH2F* MCEvent::_SetFillPixelInternal(int yView, int xView, int& nChannels, vecto
     }
     else if (yView == kU && xView == kT) {
         h = hPixelUT;
-        if (optionDisplay == kRAW) {
+        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
             channels = raw_UchannelId;
             nChannels = raw_NUchannels;
         }
-        else if (optionDisplay == kHITS) {
+        else if (optionDisplay == kHITS || optionDisplay == kCALIB) {
             channels = hit_UchannelId;
             nChannels = hit_NUchannels;
         }
     }
     else if (yView == kV && xView == kT) {
         h = hPixelVT;
-        if (optionDisplay == kRAW) {
+        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
             channels = raw_VchannelId;
             nChannels = raw_NVchannels;
         }
