@@ -22,6 +22,11 @@ public:
     TGTextButton       *prevButton, *nextButton;
     TGNumberEntryField *eventEntry; 
 
+    TGHorizontalFrame  *fDisplayFrame; 
+    TGButtonGroup      *displayButtonGroup;
+    TGRadioButton      *rawButton; 
+    TGRadioButton      *hitsButton;
+
     TGGroupFrame       *fZoomControlFrame;
     TGHorizontalFrame  *fZoomButtonFrame;
     TGTextButton       *autoZoomButton;

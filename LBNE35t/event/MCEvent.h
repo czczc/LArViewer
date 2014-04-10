@@ -18,6 +18,7 @@ public:
     enum LIMITS {
         MAX_CHANNEL = 1992,
         MAX_TRACKS = 2000,
+        MAX_HITS = 20000,
     };
 
     enum VIEW {
@@ -25,6 +26,12 @@ public:
         kV = 1, 
         kZ = 2,
         kT = -1,
+    };
+
+    enum DISPLAY {
+        kRAW = 1,
+        kHITS = 2,
+        kTRACK = 3,
     };
 
     int nEvents;
@@ -51,6 +58,11 @@ public:
     float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
     std::vector<std::vector<int> > *mc_daughters;  // daughters id of this track; vector
 
+    int    no_hits;                  //number of hits
+    int    hit_channel[MAX_HITS];    //channel ID
+    float  hit_peakT[MAX_HITS];      //peak time
+    float  hit_charge[MAX_HITS];     //charge (area)
+
     // derived variables
     int raw_NZchannels;
     int raw_NUchannels;
@@ -58,6 +70,13 @@ public:
     vector<int> raw_ZchannelId;
     vector<int> raw_UchannelId;
     vector<int> raw_VchannelId;
+
+    int hit_NZchannels;
+    int hit_NUchannels;
+    int hit_NVchannels;
+    vector<int> hit_ZchannelId;
+    vector<int> hit_UchannelId;
+    vector<int> hit_VchannelId;
 
     map<int, int> trackIndex;
     std::vector<std::vector<int> > trackParents;
@@ -70,6 +89,7 @@ public:
     TH2F *hPixelUT;
     TH2F *hPixelVT;
 
+    int optionDisplay; 
     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
     bool showAPA[4];
 

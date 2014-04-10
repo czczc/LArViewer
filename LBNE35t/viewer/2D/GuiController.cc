@@ -41,6 +41,7 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
 
     currentPalette = 1;  // dark rainbow
     currentTheme = 0; // night theme
+    currentDisplayOption = 1; // display raw signal
     currentInductionSig = 0;  // positive signal
     currentShowMC = false;  // do not show MC
     currentTrackId = 1;  // first track
@@ -108,10 +109,11 @@ void GuiController::InitConnections()
     cw->unZoomButton->Connect("Clicked()", "GuiController", this, "UnZoom()");
     cw->xrangeButton->Connect("Clicked()", "GuiController", this, "SyncXaxis()");
     cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
-    cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
     cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
     cw->apaButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateAPA(int)");
     cw->showMCButton->Connect("Clicked()", "GuiController", this, "UpdateShowMC()");
+    cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
+    cw->displayButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateDisplayOption(int)");
 
     cw->fSiblingTracksListBox->Connect("Selected(int)", "GuiController", this, "MCTrackSelected(int)");
     cw->fDaughterTracksListBox->Connect("Selected(int)", "GuiController", this, "MCTrackSelected(int)");
@@ -225,6 +227,16 @@ void GuiController::UpdatePalette(int id)
 
     Modified();
     cout << "changing theme: " << id << endl;
+}
+
+void GuiController::UpdateDisplayOption(int id)
+{
+    if(id == currentDisplayOption) return;
+    event->optionDisplay = id;
+    currentDisplayOption = id;
+
+    Reload();
+    cout << "changing display to option: " << id << endl;
 }
 
 void GuiController::UpdateInductionSig(int id)

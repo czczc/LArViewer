@@ -28,6 +28,15 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     fNavigationFrame->AddFrame(nextButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 3, 2, 2, 2));
     
 
+    // Display Option Selection
+    fDisplayFrame = new TGHorizontalFrame(this, w, 100);
+    AddFrame(fDisplayFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    displayButtonGroup = new TGButtonGroup(fDisplayFrame, "Display Properties", kHorizontalFrame); 
+    fDisplayFrame->AddFrame(displayButtonGroup, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    rawButton = new TGRadioButton(displayButtonGroup,  "Raw    "); 
+    hitsButton = new TGRadioButton(displayButtonGroup, "Hits    "); 
+    rawButton->SetState(kButtonDown);
+
     // zoom control button frame  
     fZoomControlFrame = new TGGroupFrame(this, "Display Options", kVerticalFrame);
     fZoomControlFrame->SetTitlePos(TGGroupFrame::kLeft);

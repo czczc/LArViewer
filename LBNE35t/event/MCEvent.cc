@@ -25,6 +25,7 @@ MCEvent::MCEvent(const char* filename)
     nEvents = simTree->GetEntries();
 
     geom = new MCGeometry();
+    optionDisplay = kRAW;      // default display raw signal
     optionInductionSignal = 1; // default draw positive signal only
     for (int i=0; i<4; i++) showAPA[i] = true;
 
@@ -69,6 +70,11 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("mc_endXYZT"      , &mc_endXYZT);
     simTree->SetBranchAddress("mc_startMomentum", &mc_startMomentum);
     simTree->SetBranchAddress("mc_endMomentum"  , &mc_endMomentum);
+
+    simTree->SetBranchAddress("no_hits"    , &no_hits);
+    simTree->SetBranchAddress("hit_channel", &hit_channel);
+    simTree->SetBranchAddress("hit_peakT"  , &hit_peakT);
+    simTree->SetBranchAddress("hit_charge" , &hit_charge);
 
 }
 
@@ -117,6 +123,13 @@ void MCEvent::Reset()
     raw_ZchannelId.clear();
     raw_UchannelId.clear();
     raw_VchannelId.clear();
+
+    hit_NZchannels = 0;
+    hit_NUchannels = 0;
+    hit_NVchannels = 0;
+    hit_ZchannelId.clear();
+    hit_UchannelId.clear();
+    hit_VchannelId.clear();
 }
 
 void MCEvent::ProcessChannels()
@@ -138,6 +151,24 @@ void MCEvent::ProcessChannels()
             raw_ZchannelId.push_back(channelId);
         }
     }
+
+    for (int i=0; i<no_hits; i++) {
+        int channelId = hit_channel[i];
+        MCChannel channel = geom->fChannels[channelId];
+        int plane = channel.planes[0];
+        if (plane == 0) {
+            hit_NUchannels++;
+            hit_UchannelId.push_back(channelId);
+        }
+        else if (plane == 1) {
+            hit_NVchannels++;
+            hit_VchannelId.push_back(channelId);
+        }
+        else {
+            hit_NZchannels++;
+            hit_ZchannelId.push_back(channelId);
+        }
+    }
 }
 
 void MCEvent::FillPixel(int yView, int xView)
@@ -145,19 +176,39 @@ void MCEvent::FillPixel(int yView, int xView)
     vector<int>& channels = raw_ZchannelId;
     TH2F *h = 0;
     int nChannels = 0;
+
     if (yView == kZ && xView == kT) {
         h = hPixelZT;
-        nChannels = raw_NZchannels;
+        if (optionDisplay == kRAW) {
+           channels = raw_ZchannelId;
+           nChannels = raw_NZchannels; 
+       }
+       else if (optionDisplay == kHITS) {
+           channels = hit_ZchannelId;
+           nChannels = hit_NZchannels;
+       }
     }
     else if (yView == kU && xView == kT) {
-        channels = raw_UchannelId;
         h = hPixelUT;
-        nChannels = raw_NUchannels;
+        if (optionDisplay == kRAW) {
+            channels = raw_UchannelId;
+            nChannels = raw_NUchannels;
+        }
+        else if (optionDisplay == kHITS) {
+            channels = hit_UchannelId;
+            nChannels = hit_NUchannels;
+        }
     }
     else if (yView == kV && xView == kT) {
-        channels = raw_VchannelId;
         h = hPixelVT;
-        nChannels = raw_NVchannels;
+        if (optionDisplay == kRAW) {
+            channels = raw_VchannelId;
+            nChannels = raw_NVchannels;
+        }
+        else if (optionDisplay == kHITS) {
+            channels = hit_VchannelId;
+            nChannels = hit_NVchannels;
+        }
     }
     else {
         cout << "no such combination view: " << yView << " vs " << xView;
@@ -191,30 +242,38 @@ void MCEvent::FillPixel(int yView, int xView)
                 y = geom->ProjectionV(tpc, wire);
             }
 
-            int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
-            vector<int>& tdcs = (*raw_wfTDC).at(id);
-            vector<int>& adcs = (*raw_wfADC).at(id);
-            int size_tdc = tdcs.size();
-            for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
-                // double x = tdcs[i_tdc];
-                double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
-                // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
-                int weight = adcs[i_tdc];
-                if (yView == kZ) {
-                    if (weight>0) h->Fill(x, y, weight);
-                }
-                else {
-                    if (optionInductionSignal == 1) {
+            if (optionDisplay == kRAW) {
+                int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
+                vector<int>& tdcs = (*raw_wfTDC).at(id);
+                vector<int>& adcs = (*raw_wfADC).at(id);
+                int size_tdc = tdcs.size();
+                for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
+                    // double x = tdcs[i_tdc];
+                    double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
+                    // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+                    int weight = adcs[i_tdc];
+                    if (yView == kZ) {
                         if (weight>0) h->Fill(x, y, weight);
                     }
-                    else if (optionInductionSignal == -1) {
-                        if (weight<0) h->Fill(x, y, -weight);
-                    }
-                    else if (optionInductionSignal == 0) {
-                        h->Fill(x, y, fabs(weight));
+                    else {
+                        if (optionInductionSignal == 1) {
+                            if (weight>0) h->Fill(x, y, weight);
+                        }
+                        else if (optionInductionSignal == -1) {
+                            if (weight<0) h->Fill(x, y, -weight);
+                        }
+                        else if (optionInductionSignal == 0) {
+                            h->Fill(x, y, fabs(weight));
+                        }
                     }
                 }
             }
+            else if (optionDisplay == kHITS) {
+                int id = TMath::BinarySearch(no_hits, hit_channel, channel.channelNo);
+                double x = geom->ProjectionX(tpc, hit_peakT[id]);
+                h->Fill(x, y, hit_charge[id]);
+            }
+
 
             // cout << raw_time[id] << " ";
             // cout << tpc << " ";
@@ -280,10 +339,10 @@ void MCEvent::PrintInfo(int level)
         << nEvents << ")"
         << endl;
 
-    cout << "Hit channels: " << raw_Nhit << endl;
-    cout << "Z channels: " << raw_NZchannels << endl;
-    cout << "U channels: " << raw_NUchannels << endl;
-    cout << "V channels: " << raw_NVchannels << endl;
+    cout << "hit channels (raw, hits): " << raw_Nhit << ", " << no_hits << endl;
+    cout << "Z channels: " << raw_NZchannels << ", " << hit_NZchannels << endl;
+    cout << "U channels: " << raw_NUchannels << ", " << hit_NUchannels << endl;
+    cout << "V channels: " << raw_NVchannels << ", " << hit_NVchannels << endl;
 
     // print mc info
     if (level > 0) {

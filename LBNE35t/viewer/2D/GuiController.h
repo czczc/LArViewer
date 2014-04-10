@@ -41,10 +41,11 @@ public:
     void SyncRangeVT();
     void SyncXaxis();
     void UpdateZaxis();
-    void UpdatePalette(int id);
     void UpdateInductionSig(int id);
     void UpdateAPA(int id);
     void UpdateShowMC();
+    void UpdatePalette(int id);
+    void UpdateDisplayOption(int id);
     void MCTrackSelected(int id);
     void HandleMenu(int id);
 
@@ -79,6 +80,7 @@ public:
     TDatabasePDG *dbPDG;
 
     int currentPalette;
+    int currentDisplayOption;
     int currentTheme;
     int currentInductionSig;
     bool currentShowMC;

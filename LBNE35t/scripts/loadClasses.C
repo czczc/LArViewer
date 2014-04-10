@@ -8,7 +8,7 @@
     gROOT->ProcessLine( load + prefix + "/MCGeometry.cc+" );
     gROOT->ProcessLine( load + prefix + "/MCEvent.cc+" );
 
-    TString prefix = "../viewer/2D";
+    prefix = "../viewer/2D";
     gROOT->ProcessLine( include + prefix );
     gROOT->ProcessLine( load + prefix + "/ViewWindow.cc+" );
     gROOT->ProcessLine( load + prefix + "/ControlWindow.cc+" );
