@@ -110,6 +110,9 @@ public:
     void ProcessChannels();
     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
 
+private:
+    TH2F* _SetFillPixelInternal(int yView, int xView, int& nChannels, vector<int>& channels);
+
 };
 
 #endif

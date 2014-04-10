@@ -174,47 +174,10 @@ void MCEvent::ProcessChannels()
 void MCEvent::FillPixel(int yView, int xView)
 {
     vector<int>& channels = raw_ZchannelId;
-    TH2F *h = 0;
     int nChannels = 0;
 
-    if (yView == kZ && xView == kT) {
-        h = hPixelZT;
-        if (optionDisplay == kRAW) {
-           channels = raw_ZchannelId;
-           nChannels = raw_NZchannels; 
-       }
-       else if (optionDisplay == kHITS) {
-           channels = hit_ZchannelId;
-           nChannels = hit_NZchannels;
-       }
-    }
-    else if (yView == kU && xView == kT) {
-        h = hPixelUT;
-        if (optionDisplay == kRAW) {
-            channels = raw_UchannelId;
-            nChannels = raw_NUchannels;
-        }
-        else if (optionDisplay == kHITS) {
-            channels = hit_UchannelId;
-            nChannels = hit_NUchannels;
-        }
-    }
-    else if (yView == kV && xView == kT) {
-        h = hPixelVT;
-        if (optionDisplay == kRAW) {
-            channels = raw_VchannelId;
-            nChannels = raw_NVchannels;
-        }
-        else if (optionDisplay == kHITS) {
-            channels = hit_VchannelId;
-            nChannels = hit_NVchannels;
-        }
-    }
-    else {
-        cout << "no such combination view: " << yView << " vs " << xView;
-        return;
-    }
-
+    TH2F *h = _SetFillPixelInternal(yView, xView, nChannels, channels);
+    if (!h) return;
     h->Reset();
     for (int i=0; i<nChannels; i++) {
         MCChannel channel = geom->fChannels[channels[i]];
@@ -274,15 +237,51 @@ void MCEvent::FillPixel(int yView, int xView)
                 h->Fill(x, y, hit_charge[id]);
             }
 
-
-            // cout << raw_time[id] << " ";
-            // cout << tpc << " ";
-            // cout << plane << " ";
-
         }
-        // cout << endl;
     }
     
+}
+
+TH2F* MCEvent::_SetFillPixelInternal(int yView, int xView, int& nChannels, vector<int>& channels)
+{
+    TH2F *h = 0;
+    if (yView == kZ && xView == kT) {
+        h = hPixelZT;
+        if (optionDisplay == kRAW) {
+           channels = raw_ZchannelId;
+           nChannels = raw_NZchannels; 
+       }
+       else if (optionDisplay == kHITS) {
+           channels = hit_ZchannelId;
+           nChannels = hit_NZchannels;
+       }
+    }
+    else if (yView == kU && xView == kT) {
+        h = hPixelUT;
+        if (optionDisplay == kRAW) {
+            channels = raw_UchannelId;
+            nChannels = raw_NUchannels;
+        }
+        else if (optionDisplay == kHITS) {
+            channels = hit_UchannelId;
+            nChannels = hit_NUchannels;
+        }
+    }
+    else if (yView == kV && xView == kT) {
+        h = hPixelVT;
+        if (optionDisplay == kRAW) {
+            channels = raw_VchannelId;
+            nChannels = raw_NVchannels;
+        }
+        else if (optionDisplay == kHITS) {
+            channels = hit_VchannelId;
+            nChannels = hit_NVchannels;
+        }
+    }
+    else {
+        cout << "no such combination view: " << yView << " vs " << xView;
+    }
+    return h;
 }
 
 
