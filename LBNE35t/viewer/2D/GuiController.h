@@ -47,6 +47,7 @@ public:
     void UpdatePalette(int id);
     void UpdateDisplayOption(int id);
     void MCTrackSelected(int id);
+    void ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected);
     void HandleMenu(int id);
 
     void InitTracksList();

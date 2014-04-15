@@ -29,6 +29,7 @@
 #include "TLine.h"
 #include "TMarker.h"
 #include "TList.h"
+#include "TObject.h"
 
 #include <exception>
 #include <iostream>
@@ -122,6 +123,37 @@ void GuiController::InitConnections()
     can->GetPad(1)->Connect("RangeChanged()", "GuiController", this, "SyncRangeZT()");
     can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
     can->GetPad(3)->Connect("RangeChanged()", "GuiController", this, "SyncRangeVT()");
+
+    can->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "GuiController", 
+           this, "ProcessCanvasEvent(Int_t,Int_t,Int_t,TObject*)");
+
+}
+
+
+void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected)
+{
+    if (ev == 11) { // clicked
+        if (!(selected->IsA() == TH2F::Class())) return;
+        TVirtualPad* pad = can->GetClickSelectedPad();
+        double xx = pad->AbsPixeltoX(x);
+        double yy = pad->AbsPixeltoY(y);
+        TH2F *h = (TH2F*)selected;
+        int biny = h->GetYaxis()->FindBin(yy);
+        TString name = h->GetName();
+        map<int, pair<int, int> > *m = 0;
+             if (name == "hPixelZT") m = &(event->zBintoTpcWire);
+        else if (name == "hPixelUT") m = &(event->uBintoTpcWire);
+        else if (name == "hPixelVT") m = &(event->vBintoTpcWire);
+        else { cout << "not recognized: " << name << endl; return;}
+        cout 
+            // << "event: " << ev
+            << ", x: " << xx
+            << ", y: " << yy
+            << ", h: " << name
+            << ", biny: " << biny
+            << ", (tpc, wire): (" << (*m)[biny].first << ", " << (*m)[biny].second << ")"
+            << endl;
+    }
 
 }
 

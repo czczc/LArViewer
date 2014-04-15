@@ -4,11 +4,16 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
+#include <utility>
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
 #include "TH2F.h"
+#include "TCanvas.h"
+#include "TColor.h"
+#include "TLine.h"
 
 using namespace std;
 
@@ -128,6 +133,10 @@ void MCEvent::Reset()
     trackChildren.clear();
     trackSiblings.clear();
 
+    zBintoTpcWire.clear();
+    uBintoTpcWire.clear();
+    vBintoTpcWire.clear();
+
     raw_NZchannels = 0;
     raw_NUchannels = 0;
     raw_NVchannels = 0;
@@ -184,15 +193,39 @@ void MCEvent::ProcessChannels()
 
 void MCEvent::FillPixel(int yView, int xView)
 {
-    vector<int>& channels = raw_ZchannelId;
-    int nChannels = 0;
-
-    TH2F *h = _SetFillPixelInternal(yView, xView, nChannels, channels);
+    TH2F *h = 0;
+    map<int, pair<int, int> > *m = 0;
+    if (yView == kZ && xView == kT) {
+        h = hPixelZT;
+        m = &zBintoTpcWire;
+    }
+    else if (yView == kU && xView == kT) {
+        h = hPixelUT;
+        m = &uBintoTpcWire;
+    }
+    else if (yView == kV && xView == kT) {
+        h = hPixelVT;
+        m = &vBintoTpcWire;
+    }
+    else {
+        cout << "no such combination view: " << yView << " vs " << xView;
+    }
     if (!h) return;
     h->Reset();
+
     if (optionDisplay == kRAW || optionDisplay == kCALIB) {
-        for (int i=0; i<nChannels; i++) {
-            MCChannel channel = geom->fChannels[channels[i]];
+        for (int i=0; i<raw_Nhit; i++) {
+            int channelId = raw_channelId[i];
+            MCChannel channel = geom->fChannels[channelId];
+            int plane = channel.planes[0];
+            if ( ! ((yView == kU && plane == 0) || 
+                    (yView == kV && plane == 1) ||
+                    (yView == kZ && plane == 2))
+               ) {
+                continue; // skip other channels
+            }
+
+            // MCChannel channel = geom->fChannels[channels->at(i)];
             // cout << yView << " View channel " << channels[i] << ": " << endl;
             for (int j=0; j<channel.Nwires; j++) {
                 int wire = channel.wires[j];
@@ -204,63 +237,54 @@ void MCEvent::FillPixel(int yView, int xView)
                 // only show designated APA's
                 if (!showAPA[(tpc-1)/2]) continue;
 
-                double y = (double)wire;
-                if (yView == kZ) {
-                    // y = (double)wire;
-                    y = geom->ProjectionZ(tpc, wire);
-                    // cout << tpc << " " << wire << " " << y << endl;
-                }
-                else if (yView == kU) {
-                    y = geom->ProjectionU(tpc, wire);
-                }
-                else if (yView == kV) {
-                    y = geom->ProjectionV(tpc, wire);
-                }
+                double y = _ProjectionY(yView, tpc, wire);
+                int ybin = h->GetYaxis()->FindBin(y);
+                pair<int, int> pr(tpc, wire);
+                (*m)[ybin] = pr;
 
-                if (optionDisplay == kRAW || optionDisplay == kCALIB) {
-                    int id = 0;
-                    vector<int>& tdcs = (*raw_wfTDC).at(id);
-                    vector<int>& adcs = (*raw_wfADC).at(id);
-                    int size_tdc = tdcs.size();
+                int id = 0;
+                vector<int>& tdcs = (*raw_wfTDC).at(id);
+                vector<int>& adcs = (*raw_wfADC).at(id);
+                int size_tdc = tdcs.size();
 
-                    if (optionDisplay == kRAW) {
-                        id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
-                        tdcs = (*raw_wfTDC).at(id);
-                        adcs = (*raw_wfADC).at(id);
+                if (optionDisplay == kRAW) {
+                    id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
+                    tdcs = (*raw_wfTDC).at(id);
+                    adcs = (*raw_wfADC).at(id);
+                    size_tdc = tdcs.size();
+                }
+                else {  // calib wire
+                    id = TMath::BinarySearch(calib_Nhit, calib_channelId, channel.channelNo);
+                    if (calib_channelId[id] == channel.channelNo) {
+                        tdcs = (*calib_wfTDC).at(id);
+                        adcs = (*calib_wfADC).at(id);
                         size_tdc = tdcs.size();
                     }
-                    else {  // calib wire
-                        id = TMath::BinarySearch(calib_Nhit, calib_channelId, channel.channelNo);
-                        if (id>0) {
-                            tdcs = (*calib_wfTDC).at(id);
-                            adcs = (*calib_wfADC).at(id);
-                            size_tdc = tdcs.size();
-                        }
-                        else {
-                            size_tdc = 0;
-                        }
+                    else {
+                        cout << "cannot find raw channel " << channel.channelNo << " in calib wire, skipping" << endl; 
+                        size_tdc = 0;
                     }
-                    for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
-                        // double x = tdcs[i_tdc];
-                        double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
-                        // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
-                        int weight = adcs[i_tdc];
-                        if (weight>1e4) {
-                            cout << weight << endl;
-                        }
-                        if (yView == kZ) {
+                }
+                for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
+                    // double x = tdcs[i_tdc];
+                    double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
+                    // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+                    int weight = adcs[i_tdc];
+                    if (weight>1e4) {
+                        cout << weight << endl;
+                    }
+                    if (yView == kZ) {
+                        if (weight>0) h->Fill(x, y, weight);
+                    }
+                    else {
+                        if (optionInductionSignal == 1) {
                             if (weight>0) h->Fill(x, y, weight);
                         }
-                        else {
-                            if (optionInductionSignal == 1) {
-                                if (weight>0) h->Fill(x, y, weight);
-                            }
-                            else if (optionInductionSignal == -1) {
-                                if (weight<0) h->Fill(x, y, -weight);
-                            }
-                            else if (optionInductionSignal == 0) {
-                                h->Fill(x, y, fabs(weight));
-                            }
+                        else if (optionInductionSignal == -1) {
+                            if (weight<0) h->Fill(x, y, -weight);
+                        }
+                        else if (optionInductionSignal == 0) {
+                            h->Fill(x, y, fabs(weight));
                         }
                     }
                 }
@@ -273,34 +297,22 @@ void MCEvent::FillPixel(int yView, int xView)
             MCChannel channel = geom->fChannels[channelId];
             int plane = channel.planes[0];
             if ( ! ((yView == kU && plane == 0) || 
-                   (yView == kV && plane == 1) ||
-                   (yView == kZ && plane == 2))
+                    (yView == kV && plane == 1) ||
+                    (yView == kZ && plane == 2))
                ) {
                 continue; // skip other channels
             }
             for (int j=0; j<channel.Nwires; j++) {
                 int wire = channel.wires[j];
                 int tpc = channel.tpcs[j];
-                // int plane = channel.planes[j];
 
                 // skip short drift chamber
                 if (tpc % 2 == 0) continue; 
                 // only show designated APA's
                 if (!showAPA[(tpc-1)/2]) continue;
 
-                double y = (double)wire;
-                if (yView == kZ) {
-                    // y = (double)wire;
-                    y = geom->ProjectionZ(tpc, wire);
-                    // cout << tpc << " " << wire << " " << y << endl;
-                }
-                else if (yView == kU) {
-                    y = geom->ProjectionU(tpc, wire);
-                }
-                else if (yView == kV) {
-                    y = geom->ProjectionV(tpc, wire);
-                }
                 double x = geom->ProjectionX(tpc, hit_peakT[i]);
+                double y = _ProjectionY(yView, tpc, wire);
                 h->Fill(x, y, hit_charge[i]);
             }
         }
@@ -309,46 +321,24 @@ void MCEvent::FillPixel(int yView, int xView)
     
 }
 
-TH2F* MCEvent::_SetFillPixelInternal(int yView, int xView, int& nChannels, vector<int>& channels)
+double MCEvent::_ProjectionY(int yView, int tpc, int wire)
 {
-    TH2F *h = 0;
-    if (yView == kZ && xView == kT) {
-        h = hPixelZT;
-        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
-           channels = raw_ZchannelId;
-           nChannels = raw_NZchannels; 
-       }
-       else if (optionDisplay == kHITS) {
-           channels = hit_ZchannelId;
-           nChannels = hit_NZchannels;
-       }
+    double y = 0;
+    if (yView == kZ) {
+        // y = (double)wire;
+        y = geom->ProjectionZ(tpc, wire);
+        // cout << tpc << " " << wire << " " << y << endl;
     }
-    else if (yView == kU && xView == kT) {
-        h = hPixelUT;
-        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
-            channels = raw_UchannelId;
-            nChannels = raw_NUchannels;
-        }
-        else if (optionDisplay == kHITS || optionDisplay == kCALIB) {
-            channels = hit_UchannelId;
-            nChannels = hit_NUchannels;
-        }
+    else if (yView == kU) {
+        y = geom->ProjectionU(tpc, wire);
     }
-    else if (yView == kV && xView == kT) {
-        h = hPixelVT;
-        if (optionDisplay == kRAW || optionDisplay == kCALIB) {
-            channels = raw_VchannelId;
-            nChannels = raw_NVchannels;
-        }
-        else if (optionDisplay == kHITS) {
-            channels = hit_VchannelId;
-            nChannels = hit_NVchannels;
-        }
+    else if (yView == kV) {
+        y = geom->ProjectionV(tpc, wire);
     }
     else {
-        cout << "no such combination view: " << yView << " vs " << xView;
+        cout << "I cannot recognize yView: " << yView << endl;
     }
-    return h;
+    return y;
 }
 
 
@@ -396,6 +386,61 @@ void MCEvent::ProcessTracks()
 
 }
 
+
+void MCEvent::DrawChannel(int channelId)
+{
+    TCanvas *c = new TCanvas();
+    c->cd();
+    // c->SetFrameFillColor(kWhite);
+    int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channelId);
+    if (!(raw_channelId[id] == channelId)) {
+        cout << "cannot find channel " << channelId << endl;
+        return;
+    }
+    vector<int>& tdcs = (*raw_wfTDC).at(id);
+    vector<int>& adcs = (*raw_wfADC).at(id);
+    int size_tdc = tdcs.size();
+    TString name = Form("wf_%i", channelId);
+    TString title = Form("Channel %i", channelId);
+    TH1F *h = new TH1F(name, title, 3200, 0, 3200);
+    h->SetLineColor(kWhite);
+    for (int i=0; i<size_tdc; i++) {
+        h->SetBinContent(tdcs[i], adcs[i]);
+    }
+
+    TH2F *hh = new TH2F(name+"_", title, 3200, 0, 3200, 100, -500, 500);
+    hh->Draw();
+
+    h->Draw("same");
+    hh->GetXaxis()->SetRangeUser(tdcs.at(0)-10, tdcs.at(tdcs.size()-1)+10);
+    hh->GetYaxis()->SetRangeUser(h->GetMinimum()-10, h->GetMaximum()*2.5);
+
+    int id2 = TMath::BinarySearch(calib_Nhit, calib_channelId, channelId);
+    if (!(calib_channelId[id2] == channelId)) {
+        cout << "cannot find calib channel " << channelId << endl;
+        return;
+    }
+    vector<int>& tdcs2 = (*calib_wfTDC).at(id2);
+    vector<int>& adcs2 = (*calib_wfADC).at(id2);
+    int size_tdc2 = tdcs2.size();
+    TH1F *h2 = new TH1F(name+"_calib", title, 3200, 0, 3200);
+    h2->SetLineColor(kYellow);
+    for (int i=0; i<size_tdc2; i++) {
+        h2->SetBinContent(tdcs2[i], adcs2[i]);
+    }
+    h2->Draw("same");
+
+    for (int i=0; i<no_hits; i++) {
+        if (!(channelId == hit_channel[i])) continue;
+        float pt = hit_peakT[i];
+        TLine *l = new TLine(pt, h->GetMinimum()-10, pt, h->GetMaximum()*2.5);
+        l->SetLineStyle(2);
+        l->SetLineColor(kGreen);
+        l->Draw();
+    }
+}
+
+
 void MCEvent::PrintInfo(int level)
 {
     cout << "run/subRun/event (total) : " 
@@ -405,7 +450,7 @@ void MCEvent::PrintInfo(int level)
         << nEvents << ")"
         << endl;
 
-    cout << "hit channels (raw, hits): " << raw_Nhit << ", " << no_hits << endl;
+    cout << "hit channels (raw, calib, hits): " << raw_Nhit << ", " << calib_Nhit << ", " << no_hits << endl;
     cout << "Z channels: " << raw_NZchannels << ", " << hit_NZchannels << endl;
     cout << "U channels: " << raw_NUchannels << ", " << hit_NUchannels << endl;
     cout << "V channels: " << raw_NVchannels << ", " << hit_NVchannels << endl;
@@ -434,30 +479,30 @@ void MCEvent::PrintInfo(int level)
             cout << raw_channelId[i] << " ";
         }
         cout << endl << endl;
-        cout << "raw_charge: ";
-        for (int i=0; i<raw_Nhit; i++) {
-            cout << raw_charge[i] << " ";
-        }
-        cout << endl << endl;
-        cout << "raw_time: ";
-        for (int i=0; i<raw_Nhit; i++) {
-            cout << raw_time[i] << " ";
-        }
-        cout << endl << endl;
+        // cout << "raw_charge: ";
+        // for (int i=0; i<raw_Nhit; i++) {
+        //     cout << raw_charge[i] << " ";
+        // }
+        // cout << endl << endl;
+        // cout << "raw_time: ";
+        // for (int i=0; i<raw_Nhit; i++) {
+        //     cout << raw_time[i] << " ";
+        // }
+        // cout << endl << endl;
 
         cout << "Z channels: ";
         for (int i=0; i<raw_NZchannels; i++) {
-            cout << raw_ZchannelId[i] << " ";
+            cout << raw_ZchannelId.at(i) << " ";
         }
         cout << endl << endl;
         cout << "U channels: ";
         for (int i=0; i<raw_NUchannels; i++) {
-            cout << raw_UchannelId[i] << " ";
+            cout << raw_UchannelId.at(i) << " ";
         }
         cout << endl << endl;
         cout << "V channels: ";
         for (int i=0; i<raw_NVchannels; i++) {
-            cout << raw_VchannelId[i] << " ";
+            cout << raw_VchannelId.at(i) << " ";
         }
         cout << endl << endl;
 

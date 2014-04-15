@@ -2,8 +2,9 @@
 #define MCEVENT_H
 
 #include <map>
-#include "TTree.h"
 #include <vector>
+#include <utility>
+#include "TTree.h"
 
 class MCGeometry;
 class TFile;
@@ -73,18 +74,18 @@ public:
     int raw_NZchannels;
     int raw_NUchannels;
     int raw_NVchannels;
-    vector<int> raw_ZchannelId;
-    vector<int> raw_UchannelId;
-    vector<int> raw_VchannelId;
+    std::vector<int> raw_ZchannelId;
+    std::vector<int> raw_UchannelId;
+    std::vector<int> raw_VchannelId;
 
     int hit_NZchannels;
     int hit_NUchannels;
     int hit_NVchannels;
-    vector<int> hit_ZchannelId;
-    vector<int> hit_UchannelId;
-    vector<int> hit_VchannelId;
+    std::vector<int> hit_ZchannelId;
+    std::vector<int> hit_UchannelId;
+    std::vector<int> hit_VchannelId;
 
-    map<int, int> trackIndex;
+    std::map<int, int> trackIndex;
     std::vector<std::vector<int> > trackParents;
     std::vector<std::vector<int> > trackChildren;
     std::vector<std::vector<int> > trackSiblings;
@@ -94,6 +95,9 @@ public:
     TH2F *hPixelZT;
     TH2F *hPixelUT;
     TH2F *hPixelVT;
+    std::map<int, std::pair<int, int> > zBintoTpcWire;
+    std::map<int, std::pair<int, int> > uBintoTpcWire;
+    std::map<int, std::pair<int, int> > vBintoTpcWire;
 
     int optionDisplay; 
     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
@@ -116,9 +120,9 @@ public:
     void ProcessChannels();
     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
 
+    void DrawChannel(int channel);
 private:
-    TH2F* _SetFillPixelInternal(int yView, int xView, int& nChannels, vector<int>& channels);
-
+    double _ProjectionY(int yView, int tpc, int wire);
 };
 
 #endif
