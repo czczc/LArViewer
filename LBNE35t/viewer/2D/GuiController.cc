@@ -1,6 +1,7 @@
 #include "GuiController.h"
 #include "MainWindow.h"
 #include "ViewWindow.h"
+#include "InfoWindow.h"
 #include "ControlWindow.h"
 #include "MCEvent.h"
 #include "MCGeometry.h"
@@ -30,9 +31,11 @@
 #include "TMarker.h"
 #include "TList.h"
 #include "TObject.h"
+#include "TLatex.h"
 
 #include <exception>
 #include <iostream>
+#include <map>
 using namespace std;
 
 GuiController::GuiController(const TGWindow *p, int w,int h)
@@ -71,6 +74,7 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
     mw = new MainWindow(p, w, h);
     vw = mw->fViewWindow;
     cw = mw->fControlWindow;
+    iw = mw->fControlWindow->fInfoWindow;
     can = vw->can;
 
     const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
@@ -140,19 +144,23 @@ void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *sele
         TH2F *h = (TH2F*)selected;
         int biny = h->GetYaxis()->FindBin(yy);
         TString name = h->GetName();
-        map<int, pair<int, int> > *m = 0;
-             if (name == "hPixelZT") m = &(event->zBintoTpcWire);
-        else if (name == "hPixelUT") m = &(event->uBintoTpcWire);
-        else if (name == "hPixelVT") m = &(event->vBintoTpcWire);
+        map<int, int> *m = 0;
+             if (name == "hPixelZT") m = &(event->zBintoWireHash);
+        else if (name == "hPixelUT") m = &(event->uBintoWireHash);
+        else if (name == "hPixelVT") m = &(event->vBintoWireHash);
         else { cout << "not recognized: " << name << endl; return;}
+        int wirehash = (*m)[biny];
+        int channelNo = geom->wireToChannel[wirehash];
         cout 
             // << "event: " << ev
-            << ", x: " << xx
+            << "x: " << xx
             << ", y: " << yy
             << ", h: " << name
             << ", biny: " << biny
-            << ", (tpc, wire): (" << (*m)[biny].first << ", " << (*m)[biny].second << ")"
+            << ", wire hash: " << wirehash
+            << ", channel: " << channelNo
             << endl;
+        iw->DrawWire(channelNo, event, wirehash);
     }
 
 }
@@ -324,6 +332,7 @@ void GuiController::SetTheme(int theme)
     //     event->hPixelVT->SetMinimum(0);
     // }
     vw->SetTheme(theme);
+    iw->SetTheme(theme);
 }
 
 void GuiController::Modified()
@@ -487,7 +496,8 @@ void GuiController::Reload()
     event->GetEntry(currentEvent);
     // event->PrintInfo(1);
     event->PrintInfo();
- 
+    iw->DrawEventInfo(event);
+
     InitTracksList();
     cw->showMCButton->SetState(kButtonUp);
     UpdateShowMC();

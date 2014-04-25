@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <utility>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -133,9 +132,9 @@ void MCEvent::Reset()
     trackChildren.clear();
     trackSiblings.clear();
 
-    zBintoTpcWire.clear();
-    uBintoTpcWire.clear();
-    vBintoTpcWire.clear();
+    zBintoWireHash.clear();
+    uBintoWireHash.clear();
+    vBintoWireHash.clear();
 
     raw_NZchannels = 0;
     raw_NUchannels = 0;
@@ -193,19 +192,23 @@ void MCEvent::ProcessChannels()
 
 void MCEvent::FillPixel(int yView, int xView)
 {
+    int wirePlane = 2;
     TH2F *h = 0;
-    map<int, pair<int, int> > *m = 0;
+    map<int, int> *m = 0;
     if (yView == kZ && xView == kT) {
+        wirePlane = 2;
         h = hPixelZT;
-        m = &zBintoTpcWire;
+        m = &zBintoWireHash;
     }
     else if (yView == kU && xView == kT) {
+        wirePlane = 0;
         h = hPixelUT;
-        m = &uBintoTpcWire;
+        m = &uBintoWireHash;
     }
     else if (yView == kV && xView == kT) {
+        wirePlane = 1;
         h = hPixelVT;
-        m = &vBintoTpcWire;
+        m = &vBintoWireHash;
     }
     else {
         cout << "no such combination view: " << yView << " vs " << xView;
@@ -239,9 +242,9 @@ void MCEvent::FillPixel(int yView, int xView)
 
                 double y = _ProjectionY(yView, tpc, wire);
                 int ybin = h->GetYaxis()->FindBin(y);
-                pair<int, int> pr(tpc, wire);
-                (*m)[ybin] = pr;
-
+                (*m)[ybin] = channel.Encode(wirePlane, tpc, wire);
+                if (ybin == 216) {cout << (*m)[ybin] << " " << y << " " << ybin << " " << tpc << endl;}
+                if (channelId == 191) {cout << (*m)[ybin] << " " <<  y << " " << ybin << " " << tpc << endl;}
                 int id = 0;
                 vector<int>& tdcs = (*raw_wfTDC).at(id);
                 vector<int>& adcs = (*raw_wfADC).at(id);
@@ -290,7 +293,7 @@ void MCEvent::FillPixel(int yView, int xView)
                 }
             }
         }
-    }
+    } // raw & calib done
     else if (optionDisplay == kHITS) {
         for (int i=0; i<no_hits; i++) {
             int channelId = hit_channel[i];
@@ -316,8 +319,7 @@ void MCEvent::FillPixel(int yView, int xView)
                 h->Fill(x, y, hit_charge[i]);
             }
         }
-
-    }
+    } // hits done
     
 }
 
@@ -384,60 +386,6 @@ void MCEvent::ProcessTracks()
         trackSiblings.push_back(siblings);
     }
 
-}
-
-
-void MCEvent::DrawChannel(int channelId)
-{
-    TCanvas *c = new TCanvas();
-    c->cd();
-    // c->SetFrameFillColor(kWhite);
-    int id = TMath::BinarySearch(raw_Nhit, raw_channelId, channelId);
-    if (!(raw_channelId[id] == channelId)) {
-        cout << "cannot find channel " << channelId << endl;
-        return;
-    }
-    vector<int>& tdcs = (*raw_wfTDC).at(id);
-    vector<int>& adcs = (*raw_wfADC).at(id);
-    int size_tdc = tdcs.size();
-    TString name = Form("wf_%i", channelId);
-    TString title = Form("Channel %i", channelId);
-    TH1F *h = new TH1F(name, title, 3200, 0, 3200);
-    h->SetLineColor(kWhite);
-    for (int i=0; i<size_tdc; i++) {
-        h->SetBinContent(tdcs[i], adcs[i]);
-    }
-
-    TH2F *hh = new TH2F(name+"_", title, 3200, 0, 3200, 100, -500, 500);
-    hh->Draw();
-
-    h->Draw("same");
-    hh->GetXaxis()->SetRangeUser(tdcs.at(0)-10, tdcs.at(tdcs.size()-1)+10);
-    hh->GetYaxis()->SetRangeUser(h->GetMinimum()-10, h->GetMaximum()*2.5);
-
-    int id2 = TMath::BinarySearch(calib_Nhit, calib_channelId, channelId);
-    if (!(calib_channelId[id2] == channelId)) {
-        cout << "cannot find calib channel " << channelId << endl;
-        return;
-    }
-    vector<int>& tdcs2 = (*calib_wfTDC).at(id2);
-    vector<int>& adcs2 = (*calib_wfADC).at(id2);
-    int size_tdc2 = tdcs2.size();
-    TH1F *h2 = new TH1F(name+"_calib", title, 3200, 0, 3200);
-    h2->SetLineColor(kYellow);
-    for (int i=0; i<size_tdc2; i++) {
-        h2->SetBinContent(tdcs2[i], adcs2[i]);
-    }
-    h2->Draw("same");
-
-    for (int i=0; i<no_hits; i++) {
-        if (!(channelId == hit_channel[i])) continue;
-        float pt = hit_peakT[i];
-        TLine *l = new TLine(pt, h->GetMinimum()-10, pt, h->GetMaximum()*2.5);
-        l->SetLineStyle(2);
-        l->SetLineColor(kGreen);
-        l->Draw();
-    }
 }
 
 

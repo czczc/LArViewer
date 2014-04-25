@@ -2,6 +2,7 @@
 #define MCGEOMETRY_H
 
 #include "MCChannel.h"
+#include <map>
 
 #define NCHANNELS 1992
 
@@ -15,6 +16,7 @@ public:
     // TTree *geoTree;
 
     MCChannel fChannels[NCHANNELS];
+    std::map<int, int> wireToChannel; // hash map to find channel no. given wire hash
 
     MCGeometry(const char* mapFileName="../Geometry/ChannelWireMap.txt");
     virtual ~MCGeometry();

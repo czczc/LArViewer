@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <map>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -58,6 +59,15 @@ void MCGeometry::ReadChanneleWireMap(const char* mapFileName)
             int value;
             infile >> value;
             channel->wires.push_back(value);
+        }
+        for (int j=0; j<channel->Nwires; j++) {
+            int plane = channel->planes.at(j);
+            int tpc   = channel->tpcs.at(j);
+            int wire  = channel->wires.at(j);
+            int hash  = channel->Encode(plane, tpc, wire);
+            channel->hashes.push_back(hash);
+            // add to hashmap
+            wireToChannel[hash] = channel->channelNo;
         }
     }
     infile.close();
@@ -189,7 +199,7 @@ void MCGeometry::PrintInfo()
         for (int wire=0; wire<Nwires; wire++) {
             // cout << tpc << "\t" << wire << "\t" << ProjectionZ(tpc, wire) << endl;
             // cout << tpc << "\t" << wire << "\t" << ProjectionU(tpc, wire) << endl;
-            cout << tpc << "\t" << wire << "\t" << ProjectionV(tpc, wire) << endl;
+            // cout << tpc << "\t" << wire << "\t" << ProjectionV(tpc, wire) << endl;
         }
     }
 }

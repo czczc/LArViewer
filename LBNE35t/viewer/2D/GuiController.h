@@ -9,6 +9,7 @@
 
 class MainWindow;
 class ViewWindow;
+class InfoWindow;
 class ControlWindow;
 class MCEvent;
 class MCGeometry;
@@ -62,6 +63,7 @@ public:
 
     MainWindow *mw;
     ViewWindow *vw;
+    InfoWindow *iw;
     ControlWindow *cw;
     MCEvent *event;
     MCGeometry *geom;

@@ -3,7 +3,6 @@
 
 #include <map>
 #include <vector>
-#include <utility>
 #include "TTree.h"
 
 class MCGeometry;
@@ -95,9 +94,9 @@ public:
     TH2F *hPixelZT;
     TH2F *hPixelUT;
     TH2F *hPixelVT;
-    std::map<int, std::pair<int, int> > zBintoTpcWire;
-    std::map<int, std::pair<int, int> > uBintoTpcWire;
-    std::map<int, std::pair<int, int> > vBintoTpcWire;
+    std::map<int, int> zBintoWireHash;
+    std::map<int, int> uBintoWireHash;
+    std::map<int, int> vBintoWireHash;
 
     int optionDisplay; 
     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
@@ -120,7 +119,6 @@ public:
     void ProcessChannels();
     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
 
-    void DrawChannel(int channel);
 private:
     double _ProjectionY(int yView, int tpc, int wire);
 };

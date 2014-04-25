@@ -3,6 +3,7 @@
 
 #include "TGFrame.h"
 
+class InfoWindow;
 class TGTextButton;
 class TGNumberEntryField;
 class TGButtonGroup;
@@ -66,6 +67,8 @@ public:
     TGListBox          *fSiblingTracksListBox;
     TGCheckButton      *showMCButton;
 
+    InfoWindow         *fInfoWindow;
+    
     ClassDef(ControlWindow, 0)
 };
 
