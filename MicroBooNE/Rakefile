@@ -13,3 +13,10 @@ task "3d" do |t|
     sh "root -l run3d.C"
   end
 end
+
+desc "Show Full 3D Geometry (OpenGL)"
+task "geo" do |t|
+  Dir.chdir("geometry") do
+    sh "root -l gl.C"
+  end
+end

@@ -144,7 +144,7 @@ void Gui3DController::Run()
 {
     gEve->FullRedraw3D(kTRUE);
     TGLViewer *v = gEve->GetDefaultGLViewer();
-    v->CurrentCamera().RotateRad(-0.1, -3.14*1/4);
+    v->CurrentCamera().RotateRad(-0.1, -3.14*1/3);
     // v->SetCurrentCamera(TGLViewer::kCameraPerspXOZ);
     v->SetGuideState(1, true, false, 0);
     v->DoDraw();
