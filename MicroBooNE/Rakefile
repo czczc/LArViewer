@@ -1,0 +1,15 @@
+task :default => "build"
+
+desc "Build Application"
+task :build do |t|
+  Dir.chdir("scripts") do
+    sh "root -b -q -l loadClasses.C"
+  end
+end
+
+desc "3D Viewer"
+task "3d" do |t|
+  Dir.chdir("scripts") do
+    sh "root -l run3d.C"
+  end
+end
