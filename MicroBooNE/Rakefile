@@ -20,3 +20,11 @@ task "geo" do |t|
     sh "root -l gl.C"
   end
 end
+
+desc "Test"
+task "test" do |t|
+  Dir.chdir("scripts") do
+    # provide your own test case
+    sh "root -b -q -l test.C"
+  end
+end
