@@ -8,7 +8,7 @@
     gROOT->ProcessLine( include + prefix );
     gROOT->ProcessLine( load + prefix + "/MCChannel.cc+" );
     gROOT->ProcessLine( load + prefix + "/MCGeometry.cc+" );
-    // gROOT->ProcessLine( load + prefix + "/MCEvent.cc+" );
+    gROOT->ProcessLine( load + prefix + "/MCEvent.cc+" );
 
     TString prefix = "../viewer/3D";
     gROOT->ProcessLine( include + prefix );
