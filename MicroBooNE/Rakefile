@@ -7,7 +7,14 @@ task :build do |t|
   end
 end
 
-desc "3D Viewer"
+desc "2D Event Display"
+task "2d" do |t|
+  Dir.chdir("scripts") do
+    sh "root -l run2d.C"
+  end
+end
+
+desc "3D Event Display"
 task "3d" do |t|
   Dir.chdir("scripts") do
     sh "root -l run3d.C"

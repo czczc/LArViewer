@@ -11,6 +11,27 @@ class TH2F;
 
 class MCEvent {
 public:
+    //-------------------------------------
+    MCEvent(const char* dataFileName="");
+    virtual ~MCEvent();
+
+    //  methods
+    TTree* Tree() { return simTree; }
+    MCGeometry* Geometry() { return geom; }
+    void InitBranchAddress();
+    void GetEntry(int i);
+    void Reset();
+    void PrintInfo(int level=0);  // print the current event(entry) info
+    //     void InitHistograms();
+    void ProcessTracks();
+    //     void ProcessChannels();
+    //     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
+
+    bool IsPrimary(int i) { return mc_mother[i] == 0; }
+
+    // private:
+    //     double _ProjectionY(int yView, int tpc, int wire);
+
     TFile *rootFile;
     TTree *simTree;
     MCGeometry *geom;
@@ -36,7 +57,8 @@ public:
     };
 
     int nEvents;
-
+    int currentEventEntry;
+    
     // simTree Leafs
     int eventNo;
     int runNo;
@@ -84,10 +106,10 @@ public:
 //     std::vector<int> hit_UchannelId;
 //     std::vector<int> hit_VchannelId;
 
-//     std::map<int, int> trackIndex;
-//     std::vector<std::vector<int> > trackParents;
-//     std::vector<std::vector<int> > trackChildren;
-//     std::vector<std::vector<int> > trackSiblings;
+    std::map<int, int> trackIndex;
+    std::vector<std::vector<int> > trackParents;
+    std::vector<std::vector<int> > trackChildren;
+    std::vector<std::vector<int> > trackSiblings;
 
 
 //     // histograms
@@ -102,24 +124,7 @@ public:
 //     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
 //     bool showAPA[4];
 
-    //-------------------------------------
-    MCEvent(const char* dataFileName="");
-    virtual ~MCEvent();
 
-    //  methods
-    TTree* Tree() { return simTree; }
-    MCGeometry* Geometry() { return geom; }
-    void InitBranchAddress();
-    void GetEntry(int i);
-    void Reset();
-    void PrintInfo(int level=0);  // print the current event(entry) info
-//     void InitHistograms();
-//     void ProcessTracks();
-//     void ProcessChannels();
-//     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
-
-// private:
-//     double _ProjectionY(int yView, int tpc, int wire);
 };
 
 #endif

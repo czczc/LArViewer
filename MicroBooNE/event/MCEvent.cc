@@ -18,6 +18,8 @@ using namespace std;
 
 MCEvent::MCEvent(const char* dataFileName)
 {
+    currentEventEntry = -1;  // don't load event at initialization
+
     raw_wfADC = new std::vector<std::vector<int> >;
     raw_wfTDC = new std::vector<std::vector<int> >;
     // calib_wfADC = new std::vector<std::vector<int> >;
@@ -44,6 +46,7 @@ MCEvent::MCEvent(const char* dataFileName)
 
     InitBranchAddress();
     // InitHistograms();
+
 }
 
 //----------------------------------------------------------------
@@ -109,10 +112,10 @@ void MCEvent::Reset()
     // (*calib_wfTDC).clear();
     (*mc_daughters).clear();
 
-    // trackIndex.clear();
-    // trackParents.clear();
-    // trackChildren.clear();
-    // trackSiblings.clear();
+    trackIndex.clear();
+    trackParents.clear();
+    trackChildren.clear();
+    trackSiblings.clear();
 
     // zBintoWireHash.clear();
     // uBintoWireHash.clear();
@@ -138,18 +141,73 @@ void MCEvent::GetEntry(int entry)
 {
     Reset();
     simTree->GetEntry(entry);
-    // ProcessTracks();
+    ProcessTracks();
     // ProcessChannels();
+
+    currentEventEntry = entry;
 }
+
+//----------------------------------------------------------------
+void MCEvent::ProcessTracks()
+{
+    // map track id to track index in the array
+    for (int i=0; i<mc_Ntrack; i++) {
+        trackIndex[mc_id[i]] = i;
+    }
+
+    // in trackParents, trackChildren, trackSiblings vectors, store track index (not track id)
+    for (int i=0; i<mc_Ntrack; i++) {
+        // currently, parent size == 1;
+        // for primary particle, parent id = 0;
+        vector<int> parents;
+        if ( !IsPrimary(i) ) {
+            parents.push_back(trackIndex[mc_mother[i]]);
+        }
+        trackParents.push_back(parents); // primary track will have 0 parents
+
+        vector<int> children;
+        int nChildren = (*mc_daughters).at(i).size();
+        for (int j=0; j<nChildren; j++) {
+            children.push_back(trackIndex[(*mc_daughters).at(i).at(j)]);
+        }
+        trackChildren.push_back(children);
+
+    }
+
+    // siblings
+
+    for (int i=0; i<mc_Ntrack; i++) {
+        vector<int> siblings;
+        if ( IsPrimary(i) ) {
+            for (int j=0; j<mc_Ntrack; j++) {
+                if( IsPrimary(j) ) {
+                    siblings.push_back(j);
+                }
+            }
+        }
+        else {
+            // siblings are simply children of the mother
+            int mother = trackIndex[mc_mother[i]];
+            int nSiblings = trackChildren.at(mother).size();
+            for (int j=0; j<nSiblings; j++) {
+                siblings.push_back(trackChildren.at(mother).at(j));
+            }
+        }
+        trackSiblings.push_back(siblings);
+    }
+
+}
+
 
 //----------------------------------------------------------------
 void MCEvent::PrintInfo(int level)
 {
     cout 
-    << "run/subRun/event (total) : " 
+    << "run/subRun/event: " 
     << runNo << "/" 
     << subRunNo << "/" 
-    << eventNo-1 << " ("
+    << eventNo << " ("
+    << currentEventEntry << "/"
     << nEvents << ")"
     << endl;
     cout << "raw hit channels: " << raw_Nhit << endl;
