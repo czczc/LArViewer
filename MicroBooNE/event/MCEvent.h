@@ -17,7 +17,7 @@ public:
 
     enum LIMITS {
         MAX_CHANNEL = 8254,
-        MAX_TRACKS = 2000,
+        MAX_TRACKS = 3000,
         MAX_HITS = 20000,
     };
 

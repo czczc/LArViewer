@@ -9,7 +9,7 @@ class TGMainFrame;
 class TDatabasePDG;
 class TEveTrackList;
 
-// class MCEvent;
+class MCEvent;
 
 class Gui3DController
 {
@@ -19,21 +19,22 @@ public:
     virtual ~Gui3DController();
 
     void InitGeometry();
-    // void InitNavigationFrame();
-    // void InitEvent();
-    // void Reload();
-    // void AddTracks();
-    void ProjectionView();
+    void InitNavigationFrame();
+    void InitEvent();
+    void Reload();
+    void AddTracks();
+    void AddProjectionView();
     void Run();
 
     // slots
-    // void Prev();
-    // void Next();
+    void Prev();
+    void Next();
 
-    // MCEvent *event;
-    // int currentEvent;
-    // TDatabasePDG *dbPDG;
-    // TEveTrackList *list;
+    TString baseDir;
+    MCEvent *event;
+    int currentEvent;
+    TDatabasePDG *dbPDG;
+    TEveTrackList *list;
 
     // GUIs
     TGMainFrame        *frmMain;
