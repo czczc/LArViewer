@@ -20,10 +20,18 @@ public:
     //  methods
     void ReadChanneleWireMap();
     void PrintInfo();
-    // double ProjectionZ(int tpc, int wire); // projection to Z coordinate for collection plane
-    // double ProjectionU(int tpc, int wire); // projection to perpendicular coordinate of U plane
-    // double ProjectionV(int tpc, int wire); // projection to perpendicular coordinate of V plane
-    // double ProjectionX(int tpc, int tdc);  // projection to X coordinate for drifting
+    double Projection(int plane, int wire);
+    // double ProjectionZ(int wire); // projection to Z coordinate for collection plane
+    // double ProjectionU(int wire); // projection to perpendicular coordinate of U plane
+    // double ProjectionV(int wire); // projection to perpendicular coordinate of V plane
+    // double ProjectionX(int tdc);  // projection to X coordinate for drifting
+
+    enum VIEW {
+        kU = 0,
+        kV = 1, 
+        kZ = 2,   // collection
+        kX = 3,   // drift
+    };
 };
 
 #endif

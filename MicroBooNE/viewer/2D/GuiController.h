@@ -29,8 +29,8 @@ public:
     void InitEvent(const char* filename);
     void Reload();
     void InitConnections();
-    // void DrawPixels();
-    // void Modified();
+    void DrawPixels();
+    void Modified();
 
     // slots
     void HandleFileMenu(int id);
@@ -56,7 +56,7 @@ public:
     // void AutoZoom(TH2F* hist, bool zoomY=true);
     // void DrawTrack(int id);
     // void HideTrack();
-    // void SetTheme(int theme);
+    void SetTheme(int theme);
 
     // utilities
     double KE(float* momentum);  // KE
@@ -86,10 +86,10 @@ public:
     int currentEventEntry;
     int currentTrackId;
 
-    // int currentPalette;
-    // int currentDisplayOption;
-    // int currentTheme;
-    // int currentInductionSig;
+    int currentPalette;
+    int currentDisplayOption;
+    int currentTheme;
+    int currentInductionSig;
     // bool currentShowMC;
 
 };

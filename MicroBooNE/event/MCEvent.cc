@@ -40,21 +40,21 @@ MCEvent::MCEvent(const char* dataFileName)
     cout << "total events: " << nEvents << endl;
     geom = new MCGeometry();
 
-    // optionDisplay = kRAW;      // default display raw signal
-    // optionInductionSignal = 1; // default draw positive signal only
-    // for (int i=0; i<4; i++) showAPA[i] = true;
+    optionDisplay = kRAW;      // default display raw signal
+    optionInductionSignal = 1; // default draw positive signal only
 
     InitBranchAddress();
-    // InitHistograms();
+    InitHistograms();
 
 }
 
 //----------------------------------------------------------------
 MCEvent::~MCEvent()
 {
-    // delete hPixelZT;  // delete histogram, then close file
-    // delete hPixelUT;
-    // delete hPixelVT;
+    for (int i=0; i<3; i++) {
+        delete hPixel[i];  // delete histogram, then close file
+    }
+
     delete raw_wfADC;
     delete raw_wfTDC;
     // delete calib_wfADC;
@@ -104,6 +104,30 @@ void MCEvent::InitBranchAddress()
 }
 
 //----------------------------------------------------------------
+void MCEvent::InitHistograms()
+{
+    const double xPerTDC = 0.0775;
+    const int nTDC = 3200*3;
+
+    hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 510, -168, -168+510*0.4888, nTDC, -0.6, -0.6+nTDC*xPerTDC);
+    hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 510, -168, -168+510*0.4888, nTDC, -0.6, -0.6+nTDC*xPerTDC);
+    hPixel[2] = new TH2F("hPixel_2", "X (drift distance) vs Z", 3455, 0.3, 0.3+3455*0.3, nTDC, -0.6, -0.6+nTDC*xPerTDC);
+
+    // hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
+    // hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 510, -168, -168+510*0.4888);
+    // hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.5012);
+
+    hPixel[0]->GetYaxis()->SetTitle("x [cm]");
+    hPixel[1]->GetYaxis()->SetTitle("x [cm]");
+    hPixel[2]->GetYaxis()->SetTitle("x [cm]");
+
+    hPixel[0]->GetXaxis()->SetTitle("u [cm]");
+    hPixel[1]->GetXaxis()->SetTitle("v [cm]");
+    hPixel[2]->GetXaxis()->SetTitle("z [cm]");
+
+}
+
+//----------------------------------------------------------------
 void MCEvent::Reset()
 {
     (*raw_wfADC).clear();
@@ -117,9 +141,9 @@ void MCEvent::Reset()
     trackChildren.clear();
     trackSiblings.clear();
 
-    // zBintoWireHash.clear();
-    // uBintoWireHash.clear();
-    // vBintoWireHash.clear();
+    for (int i=0; i<3; i++) {
+        bintoWireHash[i].clear();
+    }
 
     // raw_NZchannels = 0;
     // raw_NUchannels = 0;
@@ -175,7 +199,6 @@ void MCEvent::ProcessTracks()
     }
 
     // siblings
-
     for (int i=0; i<mc_Ntrack; i++) {
         vector<int> siblings;
         if ( IsPrimary(i) ) {
@@ -198,6 +221,141 @@ void MCEvent::ProcessTracks()
 
 }
 
+//----------------------------------------------------------------
+void MCEvent::FillPixel(int wirePlane)
+{
+    if (wirePlane >= 3 or wirePlane < 0) {
+        cout << "Plane " << wirePlane << "does not exist. exiting ..." << endl;
+        exit(1);
+    }
+    TH2F *h = hPixel[wirePlane];
+    h->Reset();
+    map<int, int> *m = &bintoWireHash[wirePlane];
+
+
+    if (optionDisplay == kRAW || optionDisplay == kCALIB) {
+        for (int i=0; i<raw_Nhit; i++) {
+            int channelId = raw_channelId[i];
+            MCChannel channel = geom->channels[channelId];
+            if (channel.plane != wirePlane) continue; // skip other channels
+
+            int wire = channel.wire;
+            double x = geom->Projection(wirePlane, wire);
+            int ybin = h->GetYaxis()->FindBin(x);
+            (*m)[ybin] = channel.hash;
+            int idx = 0;
+            vector<int>& tdcs = (*raw_wfTDC).at(idx);
+            vector<int>& adcs = (*raw_wfADC).at(idx);
+            int size_tdc = tdcs.size();
+            if (optionDisplay == kRAW) {
+                idx = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
+                tdcs = (*raw_wfTDC).at(idx);
+                adcs = (*raw_wfADC).at(idx);
+                size_tdc = tdcs.size();
+            }
+            else {  // calib wire
+            }
+            for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
+                double y = geom->Projection(MCGeometry::kX, tdcs[i_tdc]);
+                // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+                int weight = adcs[i_tdc];
+                if (weight>1e4) {
+                    cout << weight << endl;
+                }
+                if (wirePlane == MCGeometry::kZ) {
+                    if (weight>0) h->Fill(x, y, weight);
+                }
+                else {  // induction plane has negative readouts
+                    if (optionInductionSignal == 1) {
+                        if (weight>0) h->Fill(x, y, weight);
+                    }
+                    else if (optionInductionSignal == -1) {
+                        if (weight<0) h->Fill(x, y, -weight);
+                    }
+                    else if (optionInductionSignal == 0) {
+                        h->Fill(x, y, fabs(weight));
+                    }
+                }
+            }  // tdc loops done
+        }  // channel loops done
+    } // raw & calib done
+
+
+
+    //         for (int j=0; j<channel.Nwires; j++) {
+
+
+    //             if (optionDisplay == kRAW) {
+    //                 id = TMath::BinarySearch(raw_Nhit, raw_channelId, channel.channelNo);
+    //                 tdcs = (*raw_wfTDC).at(id);
+    //                 adcs = (*raw_wfADC).at(id);
+    //                 size_tdc = tdcs.size();
+    //             }
+    //             else {  // calib wire
+    //                 id = TMath::BinarySearch(calib_Nhit, calib_channelId, channel.channelNo);
+    //                 if (calib_channelId[id] == channel.channelNo) {
+    //                     tdcs = (*calib_wfTDC).at(id);
+    //                     adcs = (*calib_wfADC).at(id);
+    //                     size_tdc = tdcs.size();
+    //                 }
+    //                 else {
+    //                     cout << "cannot find raw channel " << channel.channelNo << " in calib wire, skipping" << endl; 
+    //                     size_tdc = 0;
+    //                 }
+    //             }
+    //             for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
+    //                 // double x = tdcs[i_tdc];
+    //                 double x = geom->ProjectionX(tpc, tdcs[i_tdc]);
+    //                 // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+    //                 int weight = adcs[i_tdc];
+    //                 if (weight>1e4) {
+    //                     cout << weight << endl;
+    //                 }
+    //                 if (yView == kZ) {
+    //                     if (weight>0) h->Fill(x, y, weight);
+    //                 }
+    //                 else {
+    //                     if (optionInductionSignal == 1) {
+    //                         if (weight>0) h->Fill(x, y, weight);
+    //                     }
+    //                     else if (optionInductionSignal == -1) {
+    //                         if (weight<0) h->Fill(x, y, -weight);
+    //                     }
+    //                     else if (optionInductionSignal == 0) {
+    //                         h->Fill(x, y, fabs(weight));
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // else if (optionDisplay == kHITS) {
+    //     for (int i=0; i<no_hits; i++) {
+    //         int channelId = hit_channel[i];
+    //         MCChannel channel = geom->channels[channelId];
+    //         int plane = channel.planes[0];
+    //         if ( ! ((yView == kU && plane == 0) || 
+    //                 (yView == kV && plane == 1) ||
+    //                 (yView == kZ && plane == 2))
+    //            ) {
+    //             continue; // skip other channels
+    //         }
+    //         for (int j=0; j<channel.Nwires; j++) {
+    //             int wire = channel.wires[j];
+    //             int tpc = channel.tpcs[j];
+
+    //             // skip short drift chamber
+    //             if (tpc % 2 == 0) continue; 
+    //             // only show designated APA's
+    //             if (!showAPA[(tpc-1)/2]) continue;
+
+    //             double x = geom->ProjectionX(tpc, hit_peakT[i]);
+    //             double y = _ProjectionY(yView, tpc, wire);
+    //             h->Fill(x, y, hit_charge[i]);
+    //         }
+    //     }
+    // } // hits done
+    
+}
 
 //----------------------------------------------------------------
 void MCEvent::PrintInfo(int level)

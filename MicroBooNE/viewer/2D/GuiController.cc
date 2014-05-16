@@ -46,10 +46,10 @@ GuiController::GuiController(const TGWindow *p, int w, int h)
 
     dbPDG = new TDatabasePDG();
 
-    // currentPalette = 1;  // dark rainbow
-    // currentTheme = 0; // night theme
-    // currentDisplayOption = 1; // display raw signal
-    // currentInductionSig = 0;  // positive signal
+    currentPalette = 1;  // dark rainbow
+    currentTheme = 0; // night theme
+    currentDisplayOption = 1; // display raw signal
+    currentInductionSig = 0;  // positive signal
     // currentShowMC = false;  // do not show MC
     // currentTrackId = 1;  // first track
 
@@ -309,63 +309,62 @@ void GuiController::InitConnections()
 
 // }
 
-// void GuiController::SetTheme(int theme)
-// {
-//     // if (theme == 0) {
-//     //     // by default, empty bins are not painted, which is overwritten if there is negative bin content
-//     //     // event->hPixelZT->SetMinimum(-1);
-//     //     // event->hPixelUT->SetMinimum(-1);
-//     //     // event->hPixelVT->SetMinimum(-1);
-//     // }
-//     // else {
-//     //     event->hPixelZT->SetMinimum(0);
-//     //     event->hPixelUT->SetMinimum(0);
-//     //     event->hPixelVT->SetMinimum(0);
-//     // }
-//     vw->SetTheme(theme);
-//     iw->SetTheme(theme);
-// }
+//-------------------------------------------------
+void GuiController::SetTheme(int theme)
+{
+    // if (theme == 0) {
+    //     // by default, empty bins are not painted, which is overwritten if there is negative bin content
+    //     // event->hPixelZT->SetMinimum(-1);
+    //     // event->hPixelUT->SetMinimum(-1);
+    //     // event->hPixelVT->SetMinimum(-1);
+    // }
+    // else {
+    //     event->hPixelZT->SetMinimum(0);
+    //     event->hPixelUT->SetMinimum(0);
+    //     event->hPixelVT->SetMinimum(0);
+    // }
+    vw->SetTheme(theme);
+    iw->SetTheme(theme);
+}
 
-// void GuiController::Modified()
-// {   
+//-------------------------------------------------
+void GuiController::Modified()
+{   
 
-//     can->GetPad(1)->Modified();
-//     // can->GetPad(1)->Update();
-//     can->GetPad(2)->Modified();
-//     // can->GetPad(2)->Update();
-//     can->GetPad(3)->Modified();
-//     // can->GetPad(3)->Update();
-//     can->Update();
-// }
+    can->GetPad(1)->Modified();
+    can->GetPad(2)->Modified();
+    can->GetPad(3)->Modified();
+    can->Update();
+}
 
+//-------------------------------------------------
+void GuiController::DrawPixels()
+{
+    TH2F *h = 0;
 
-// void GuiController::DrawPixels()
-// {
-//     TH2F *h = 0;
-
-//     can->cd(1);
-//     event->FillPixel(2, -1); // ZT
-//     h = event->hPixelZT;
-//     h->Draw("colz");
-//     cw->ztColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
-
-
-//     can->cd(2);
-//     event->FillPixel(0, -1); // UT
-//     h = event->hPixelUT;
-//     h->Draw("colz");
-//     cw->utColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
+    can->cd(1);
+    event->FillPixel(MCGeometry::kZ);
+    h = event->hPixel[MCGeometry::kZ];
+    h->Draw("colz");
+    // cw->ztColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
 
 
-//     can->cd(3);
-//     event->FillPixel(1, -1); // VT
-//     h = event->hPixelVT;
-//     h->Draw("colz");
-//     cw->vtColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
+    // can->cd(2);
+    // event->FillPixel(MCGeometry::kU);
+    // h = event->hPixel[MCGeometry::kU];
+    // h->Draw("colz");
+    // // cw->utColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
 
-//     SetTheme(currentTheme);
-//     Modified();
-// }
+
+    // can->cd(3);
+    // event->FillPixel(MCGeometry::kV);
+    // h = event->hPixel[MCGeometry::kV];
+    // h->Draw("colz");
+    // // cw->vtColorEntry->SetIntNumber(h->GetBinContent(h->GetMaximumBin()));
+
+    SetTheme(currentTheme);
+    Modified();
+}
 
 
 // void GuiController::DrawTrack(int id) 
@@ -493,7 +492,7 @@ void GuiController::Reload()
     MCTrackSelected(1); // select the first track
     // cw->fShowMCButton->SetState(kButtonUp);
     // UpdateShowMC();
-    // DrawPixels();
+    DrawPixels();
 }
 
 // //-------------------------------------------------

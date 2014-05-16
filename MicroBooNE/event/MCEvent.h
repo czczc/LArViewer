@@ -22,15 +22,14 @@ public:
     void GetEntry(int i);
     void Reset();
     void PrintInfo(int level=0);  // print the current event(entry) info
-    //     void InitHistograms();
+    void InitHistograms();
     void ProcessTracks();
-    //     void ProcessChannels();
-    //     void FillPixel(int yView, int xView);  // T=-1, U=0, V=1, Z=2
-
+    // void ProcessChannels();
     bool IsPrimary(int i) { return mc_mother[i] == 0; }
 
-    // private:
-    //     double _ProjectionY(int yView, int tpc, int wire);
+    void FillPixel(int plane);  // U=0, V=1, Z=2
+
+
 
     TFile *rootFile;
     TTree *simTree;
@@ -40,13 +39,6 @@ public:
         MAX_CHANNEL = 8254,
         MAX_TRACKS = 3000,
         MAX_HITS = 20000,
-    };
-
-    enum VIEW {
-        kU = 0,
-        kV = 1, 
-        kZ = 2,
-        kT = -1,
     };
 
     enum DISPLAY {
@@ -112,16 +104,16 @@ public:
     std::vector<std::vector<int> > trackSiblings;
 
 
-//     // histograms
-//     TH2F *hPixelZT;
-//     TH2F *hPixelUT;
-//     TH2F *hPixelVT;
+    // histograms
+    TH2F *hPixel[3]; // 0: XvsU; 1: XvsV; 2: XvsZ; 
+    std::map<int, int> bintoWireHash[3];  // for the three histograms, maps bin number to wire hash
+
 //     std::map<int, int> zBintoWireHash;
 //     std::map<int, int> uBintoWireHash;
 //     std::map<int, int> vBintoWireHash;
 
-//     int optionDisplay; 
-//     int optionInductionSignal;  // 1:pos; 0:both; -1:neg
+    int optionDisplay; 
+    int optionInductionSignal;  // 1:pos; 0:both; -1:neg
 //     bool showAPA[4];
 
 
