@@ -9,11 +9,11 @@
 
 (on the cluster where you do the simulation and reconstruction)
 
-* copy the [CTree/](https://github.com/czczc/LArViewer/tree/master/MicroBooNE/CTree) directory to the LarSoft code area (e.g. under srcs/uboonecode/uboone/)
+* copy the local [CTree/](https://github.com/czczc/LArViewer/tree/master/MicroBooNE/CTree) directory to the LarSoft code area (e.g. under srcs/uboonecode/uboone/)
 * re-build the LarSoft
 * lar -c ctree.fcl (input_file)
 
-This will generate a "sample.root" file for the event display. You can then scp this file to the [data/](https://github.com/czczc/LArViewer/tree/master/MicroBooNE/data) local directory.
+This will generate a "sample.root" file for the event display. You can then scp this file to your local [data/](https://github.com/czczc/LArViewer/tree/master/MicroBooNE/data) directory.
 
 ### Build the Application
     cd scripts
