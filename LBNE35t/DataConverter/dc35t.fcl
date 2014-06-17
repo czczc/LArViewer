@@ -20,7 +20,7 @@ source:
   module_type: RootInput
   # fileNames:  [ "/afs/fnal.gov/files/home/room2/chaoz/app/0220/single35t_e-_2GeV.root" ] 
   # fileNames:  [ "/afs/fnal.gov/files/home/room2/chaoz/app/0220/single35t_muon_2GeV.root" ] 
-  fileNames:  [ "/afs/fnal.gov/files/home/room2/chaoz/app/0220/single35t_kaon_340MeV.root" ] 
+  # fileNames:  [ "/afs/fnal.gov/files/home/room2/chaoz/app/0220/single35t_kaon_340MeV.root" ] 
   # fileNames:  [ "/afs/fnal.gov/files/home/room2/chaoz/app/0220/single35t_pho_105MeV.root" ] 
   firstEvent : 1
   maxEvents:  -1
@@ -38,7 +38,9 @@ physics:
     {
       module_type:     "DataConverter35t"
       RawDigitLabel:   "daq"
-      outFile: "sample.root"
+      CalibLabel:      "caldata"
+      HitsModuleLabel: "gaushit"
+      outFile:         "sample.root"
       saveChannelWireMap: false
     }
   }

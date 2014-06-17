@@ -33,6 +33,9 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#include "RecoBase/Hit.h"
+#include "RecoBase/Wire.h"
+
 // ROOT includes.
 #include "TFile.h"
 #include "TTree.h"
@@ -48,14 +51,16 @@
 // #include <sstream>
 // #include <cmath>
 
-#ifdef __MAKECINT__
-#pragma link C++ class vector<vector<int> >+;
-#endif
+// #ifdef __MAKECINT__
+// #pragma link C++ class vector<vector<int> >+;
+// #pragma link C++ class vector<vector<float> >+;
+// #endif
 
 #define MAX_TPC 8
 #define MAX_PLANE 3
 #define MAX_CHANNEL 1992
 #define MAX_TRACKS 2000
+#define MAX_HITS 20000
 
 using namespace std;
 
@@ -78,7 +83,9 @@ public:
     void saveWireGeometry();
     void printGeometry();
     void processRaw(const art::Event& evt);
+    void processCalib(const art::Event& evt);
     void processMC(const art::Event& evt);
+    void processHits(const art::Event& evt);
     void printEvent();
     void reset();
 
@@ -86,6 +93,8 @@ private:
 
     // the parameters we'll read from the .fcl
     std::string fRawDigitLabel;
+    std::string fCalibLabel;
+    std::string fHitsModuleLabel;
     std::string fOutFileName;
     bool fSaveChannelWireMap;
 
@@ -123,6 +132,12 @@ private:
     std::vector<std::vector<int> > fRaw_wfADC;
     std::vector<std::vector<int> > fRaw_wfTDC;
 
+    int fCalib_Nhit;
+    int fCalib_channelId[MAX_CHANNEL];  // hit channel id; size == fCalib_Nhit
+    // FIXEME:: cannot save e.g std::vector<std::vector<float> > in ttree
+    std::vector<std::vector<int> > fCalib_wfADC;  
+    std::vector<std::vector<int> > fCalib_wfTDC;
+
 
     int fMC_Ntrack;  // number of tracks in MC
     int fMC_id[MAX_TRACKS];  // track id; size == mc_Ntrack
@@ -134,12 +149,18 @@ private:
     float fMC_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
     std::vector<std::vector<int> > fMC_daughters;  // daughters id of this track; vector
 
-    int fPDG;
-    int fTrackID;
-    double fStartXYZT[4];
-    double fEndXYZT[4];
-    double fStartPE[4];
-    double fEndPE[4];
+
+    int    no_hits;                  //number of hits
+    int    hit_channel[MAX_HITS];    //channel ID
+    float  hit_peakT[MAX_HITS];      //peak time
+    float  hit_charge[MAX_HITS];     //charge (area)
+
+    // int fPDG;
+    // int fTrackID;
+    // double fStartXYZT[4];
+    // double fEndXYZT[4];
+    // double fStartPE[4];
+    // double fEndPE[4];
 
 	 // unsigned int UVPlane[4]={3,2,1,0};
 	 // unsigned int ZPlane[8]={7,6,5,4,3,2,1,0};
@@ -165,6 +186,8 @@ DataConverter35t::~DataConverter35t()
 //-----------------------------------------------------------------------
 void DataConverter35t::reconfigure(fhicl::ParameterSet const& p){
     fRawDigitLabel = p.get< std::string >("RawDigitLabel");
+    fCalibLabel = p.get< std::string >("CalibLabel");
+    fHitsModuleLabel = p.get< std::string >("HitsModuleLabel");
     fOutFileName = p.get< std::string >("outFile");
     fSaveChannelWireMap = p.get< bool >("saveChannelWireMap");
 }
@@ -212,6 +235,11 @@ void DataConverter35t::initOutput()
     fEventTree->Branch("raw_wfADC", &fRaw_wfADC);  // raw waveform adc of each channel
     fEventTree->Branch("raw_wfTDC", &fRaw_wfTDC);  // raw waveform tdc of each channel
 
+    fEventTree->Branch("calib_Nhit", &fCalib_Nhit);  // number of hit channels above threshold
+    fEventTree->Branch("calib_channelId" , &fCalib_channelId, "calib_channelId[calib_Nhit]/I"); // hit channel id; size == calib_Nhit
+    fEventTree->Branch("calib_wfADC", &fCalib_wfADC);  // calib waveform adc of each channel
+    fEventTree->Branch("calib_wfTDC", &fCalib_wfTDC);  // calib waveform tdc of each channel
+
 
     fEventTree->Branch("mc_Ntrack", &fMC_Ntrack);  // number of tracks in MC
     fEventTree->Branch("mc_id", &fMC_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
@@ -223,6 +251,11 @@ void DataConverter35t::initOutput()
     fEventTree->Branch("mc_startMomentum", &fMC_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
     fEventTree->Branch("mc_endMomentum", &fMC_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
 
+
+    fEventTree->Branch("no_hits", &no_hits);  //number of hits
+    fEventTree->Branch("hit_channel", &hit_channel, "hit_channel[no_hits]/I");  // channel ID
+    fEventTree->Branch("hit_peakT", &hit_peakT, "hit_peakT[no_hits]/F");  // peak time
+    fEventTree->Branch("hit_charge", &hit_charge, "hit_charge[no_hits]/F");  // charge (area)
 
     gDirectory = tmpDir;
 
@@ -409,7 +442,9 @@ void DataConverter35t::analyze( const art::Event& event )
     fSubRun = event.subRun();
 
     processRaw(event);
+    processCalib(event);
     processMC(event);
+    processHits(event);
     printEvent();
     fEventTree->Fill();
 }
@@ -420,11 +455,15 @@ void DataConverter35t::reset()
 {
     fRaw_wfADC.clear();
     fRaw_wfTDC.clear();
+    fCalib_wfADC.clear();
+    fCalib_wfTDC.clear();
     for (int i=0; i<MAX_CHANNEL; i++) {
         fRaw_channelId[i] = 0;
         fRaw_charge[i] = 0;
         fRaw_time[i] = 0;
+        fCalib_channelId[i] = 0;
     }
+
     for (int i=0; i<MAX_TRACKS; i++) {
         fMC_id[i] = 0;
         fMC_pdg[i] = 0;
@@ -437,6 +476,12 @@ void DataConverter35t::reset()
         }
     }
     fMC_daughters.clear();
+
+    for (int i=0; i<MAX_HITS; i++) {
+        hit_channel[i] = 0;
+        hit_peakT[i] = 0;
+        hit_charge[i] = 0;
+    }
 
 }
 
@@ -515,6 +560,59 @@ void DataConverter35t::processRaw( const art::Event& event )
 
 }
 
+void DataConverter35t::processCalib( const art::Event& event )
+{
+
+    art::Handle< std::vector<recob::Wire> > wires_handle;
+    event.getByLabel(fCalibLabel, wires_handle);
+
+    // put it in a more easily usable form
+    std::vector< art::Ptr<recob::Wire> >  wires;
+    art::fill_ptr_vector(wires, wires_handle);
+
+    // wires size should == Nchannels == 1992; (no hit channel has a flat 0-waveform)
+    // cout << "\n wires size: " << wires.size() << endl;
+
+    fCalib_Nhit = 0;
+    for (auto const& wire : wires) {      
+        std::vector<float> calibwf = wire->Signal(); 
+        int chanId = wire->Channel();
+        int nSamples = calibwf.size();
+        int pedstal = 0;
+
+        short thresh = pedstal + 1; // threshold set to 1 adc;
+        bool isHit = false;
+        for (auto const& adc : calibwf) {
+            if (adc > thresh) {
+                isHit = true;
+                break;
+            }
+        }
+        if (!isHit) continue; // skip empty channels
+
+        int id = fCalib_Nhit;
+        fCalib_channelId[id] = chanId;
+
+        vector<int> wfADC;
+        vector<int> wfTDC;
+        int nSavedSamples = 0;
+        for (int i=0; i<nSamples; i++) {
+            int adc = int(calibwf[i]);
+            if (adc != pedstal) {
+                // cout << i << "," << adc << " | ";
+                nSavedSamples++;
+                wfADC.push_back(adc);
+                wfTDC.push_back(i);
+            }
+        }
+        // cout << endl;
+
+        fCalib_wfADC.push_back(wfADC);
+        fCalib_wfTDC.push_back(wfTDC);
+        fCalib_Nhit++;
+    }
+
+}
 
 void DataConverter35t::processMC( const art::Event& event )
 {
@@ -555,6 +653,28 @@ void DataConverter35t::processMC( const art::Event& event )
     } // particle loop done 
 }
 
+
+void DataConverter35t::processHits( const art::Event& event )
+{
+    art::Handle< std::vector<recob::Hit> > hitListHandle;
+    event.getByLabel(fHitsModuleLabel, hitListHandle);
+    std::vector<art::Ptr<recob::Hit> > hitlist;
+    art::fill_ptr_vector(hitlist, hitListHandle);
+
+    no_hits = hitlist.size();
+    if (no_hits>MAX_HITS) {
+        mf::LogError("DataConverter35t") << "Event has " << no_hits
+        << " hits, MAX ALLOWED: " << MAX_HITS;
+    }
+    for (int i=0; i<no_hits; i++) {
+        art::Ptr<recob::Hit> hit = hitlist[i];
+        hit_channel[i] = hit->Channel();
+        hit_charge[i] = hit->Charge();
+        hit_peakT[i] = hit->PeakTime();        
+    }
+}
+
+
 void DataConverter35t::printEvent()
 {
     cout << " Event: " << fEvent << endl;
@@ -575,7 +695,14 @@ void DataConverter35t::printEvent()
 
         cout << endl;
     }
-    
+
+    cout << "Number of Hits Found: " << no_hits << endl;
+    // for (int i=0; i<no_hits; i++) {
+    //     cout << hit_channel[i] << ", ";
+    //     cout << hit_charge[i] << ", ";
+    //     cout << hit_peakT[i] << ", ";
+    //     cout << endl;
+    // }
 
 }
 

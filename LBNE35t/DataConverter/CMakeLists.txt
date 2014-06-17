@@ -6,6 +6,8 @@ art_make( BASENAME_ONLY
           BackTracker_service
           Utilities
           RawData
+          RecoBase
+          RecoObjects
           ${SIMULATIONBASE}
           ${LARRECO_LIB}
           ${LARDATA_LIB}
