@@ -56,6 +56,8 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
 
     // unZoomButton = new TGTextButton(fZoomButtonFrame, "UnZoom");
     // fZoomButtonFrame->AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    unZoomButton = new TGTextButton(this, "UnZoom");
+    AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // // XaxisFrame Frame
     // fXaxisFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);

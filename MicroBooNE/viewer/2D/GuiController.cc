@@ -102,7 +102,7 @@ void GuiController::InitConnections()
     cw->fPrevButton->Connect("Clicked()", "GuiController", this, "Prev()");
     cw->fNextButton->Connect("Clicked()", "GuiController", this, "Next()");
     // cw->autoZoomButton->Connect("Clicked()", "GuiController", this, "AutoZoom()");
-    // cw->unZoomButton->Connect("Clicked()", "GuiController", this, "UnZoom()");
+    cw->unZoomButton->Connect("Clicked()", "GuiController", this, "UnZoom()");
     // cw->xrangeButton->Connect("Clicked()", "GuiController", this, "SyncXaxis()");
     // cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
     // cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
@@ -165,21 +165,18 @@ void GuiController::InitConnections()
 
 // }
 
-// void GuiController::UnZoom(bool redraw)
-// {    
-//     xMin_now = 1;
-//     xMax_now = 3200;
-//     event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now); 
-//     event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now); 
-//     event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
-//     event->hPixelZT->GetYaxis()->SetRange(1, 343); 
-//     event->hPixelUT->GetYaxis()->SetRange(1, 510); 
-//     event->hPixelVT->GetYaxis()->SetRange(1, 495);
-//     cw->tdcMinEntry->SetIntNumber(xMin_now);
-//     cw->tdcMaxEntry->SetIntNumber(xMax_now);
-//     if (redraw) Modified();
-
-// }
+void GuiController::UnZoom(bool redraw)
+{    
+    int xMin_now = 1;
+    int xMax_now = 9600;
+    event->hPixel[2]->GetYaxis()->SetRange(xMin_now, xMax_now); 
+    // event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now); 
+    // event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
+    event->hPixel[2]->GetXaxis()->SetRange(1, 3455); 
+    // event->hPixelUT->GetYaxis()->SetRange(1, 510); 
+    // event->hPixelVT->GetYaxis()->SetRange(1, 495);
+    if (redraw) Modified();
+}
 
 // void GuiController::SyncRangeZT()
 // {

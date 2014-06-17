@@ -38,7 +38,7 @@ public:
     void Prev();
     void Next();
     // void AutoZoom();
-    // void UnZoom(bool redraw=true);
+    void UnZoom(bool redraw=true);
     // void SyncRangeZT();
     // void SyncRangeUT();
     // void SyncRangeVT();

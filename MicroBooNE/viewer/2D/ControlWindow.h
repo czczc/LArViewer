@@ -33,7 +33,7 @@ public:
     // TGGroupFrame       *fZoomControlFrame;
     // TGHorizontalFrame  *fZoomButtonFrame;
     // TGTextButton       *autoZoomButton;
-    // TGTextButton       *unZoomButton;
+    TGTextButton       *unZoomButton;
     // TGHorizontalFrame  *fXaxisFrame;
     // TGTextButton       *xrangeButton;
     // TGNumberEntryField *tdcMinEntry, *tdcMaxEntry;
