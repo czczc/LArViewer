@@ -11,6 +11,7 @@
 
 * copy the local [DataConverter/](https://github.com/czczc/LArViewer/tree/master/LBNE35t/DataConverter) directory to the LarSoft code area (e.g. under srcs/lbnecode/lbne/)
 * re-build the LarSoft
+* (if necessary) cp the two .fcl file "reco35t.fcl" and "dc35t.fcl" under [DataConverter/](https://github.com/czczc/LArViewer/tree/master/LBNE35t/DataConverter) to your current working directory.
 * (if you haven't produced a reco file) lar -c reco35t.fcl (raw_MC_file)
 * lar -c dc35t.fcl (reco_file)
 
