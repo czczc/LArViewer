@@ -48,16 +48,16 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
     // fZoomControlFrame->SetTitlePos(TGGroupFrame::kLeft);
     // AddFrame(fZoomControlFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    // fZoomButtonFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);
-    // fZoomControlFrame->AddFrame(fZoomButtonFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    TGHorizontalFrame *zoomButtonFrame = new TGHorizontalFrame(this, w, 100, kFixedWidth);
+    AddFrame(zoomButtonFrame, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    {
+        fAutoZoomButton = new TGTextButton(zoomButtonFrame, "Auto Zoom");
+        zoomButtonFrame->AddFrame(fAutoZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
-    // autoZoomButton = new TGTextButton(fZoomButtonFrame, "Auto Zoom");
-    // fZoomButtonFrame->AddFrame(autoZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+        fUnZoomButton = new TGTextButton(zoomButtonFrame, "UnZoom");
+        zoomButtonFrame->AddFrame(fUnZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+    }
 
-    // unZoomButton = new TGTextButton(fZoomButtonFrame, "UnZoom");
-    // fZoomButtonFrame->AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
-    unZoomButton = new TGTextButton(this, "UnZoom");
-    AddFrame(unZoomButton, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
 
     // // XaxisFrame Frame
     // fXaxisFrame = new TGHorizontalFrame(fZoomControlFrame, w, 100);

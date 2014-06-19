@@ -37,7 +37,7 @@ public:
     void MenuOpen();
     void Prev();
     void Next();
-    // void AutoZoom();
+    void AutoZoom();
     void UnZoom(bool redraw=true);
     // void SyncRangeZT();
     // void SyncRangeUT();
@@ -53,7 +53,7 @@ public:
     // void ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected);
 
     // void InitTracksList();
-    // void AutoZoom(TH2F* hist, bool zoomY=true);
+    void AutoZoom(TH2F* hist, bool zoomY=true);
     // void DrawTrack(int id);
     // void HideTrack();
     void SetTheme(int theme);
@@ -74,7 +74,7 @@ public:
     TString baseDir;
     TDatabasePDG *dbPDG;
 
-    // int xMin_now, xMax_now;
+    int xMin_now, xMax_now;
 
     // TLine* trackLineZ;
     // TMarker* trackStartPointZ;

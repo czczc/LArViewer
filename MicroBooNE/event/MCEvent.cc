@@ -109,13 +109,9 @@ void MCEvent::InitHistograms()
     const double xPerTDC = 0.0775;
     const int nTDC = 3200*3;
 
-    hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 510, -168, -168+510*0.4888, nTDC, -0.6, -0.6+nTDC*xPerTDC);
-    hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 510, -168, -168+510*0.4888, nTDC, -0.6, -0.6+nTDC*xPerTDC);
+    hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 2398, -202, -202+2398*0.3, nTDC, -0.6, -0.6+nTDC*xPerTDC);
+    hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 2398, 0.2, 0.2+2398*0.3, nTDC, -0.6, -0.6+nTDC*xPerTDC);
     hPixel[2] = new TH2F("hPixel_2", "X (drift distance) vs Z", 3455, 0.3, 0.3+3455*0.3, nTDC, -0.6, -0.6+nTDC*xPerTDC);
-
-    // hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
-    // hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 510, -168, -168+510*0.4888);
-    // hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.5012);
 
     hPixel[0]->GetYaxis()->SetTitle("x [cm]");
     hPixel[1]->GetYaxis()->SetTitle("x [cm]");
@@ -224,6 +220,8 @@ void MCEvent::ProcessTracks()
 //----------------------------------------------------------------
 void MCEvent::FillPixel(int wirePlane)
 {
+    adc_thresh = 5.;
+    
     if (wirePlane >= 3 or wirePlane < 0) {
         cout << "Plane " << wirePlane << "does not exist. exiting ..." << endl;
         exit(1);
@@ -261,6 +259,9 @@ void MCEvent::FillPixel(int wirePlane)
                 int weight = adcs[i_tdc];
                 if (weight>1e4) {
                     cout << weight << endl;
+                }
+                if (fabs(weight) < adc_thresh) {
+                    continue; // removing noise, increasing draw speed.
                 }
                 if (wirePlane == MCGeometry::kZ) {
                     if (weight>0) h->Fill(x, y, weight);

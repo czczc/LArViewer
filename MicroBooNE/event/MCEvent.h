@@ -107,6 +107,7 @@ public:
     // histograms
     TH2F *hPixel[3]; // 0: XvsU; 1: XvsV; 2: XvsZ; 
     std::map<int, int> bintoWireHash[3];  // for the three histograms, maps bin number to wire hash
+    double adc_thresh; // noise threshold for histogram
 
 //     std::map<int, int> zBintoWireHash;
 //     std::map<int, int> uBintoWireHash;
