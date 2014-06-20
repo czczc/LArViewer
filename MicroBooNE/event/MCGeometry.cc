@@ -61,7 +61,7 @@ double MCGeometry::Projection(int plane, int wire)
     // all numbers are in cm;
     double distance = -10000; // init to some unphysical region
     if (plane == kX) {  // drift axis
-        double start = -0.6;  // x of the collection plane
+        double start = -0.6-3200*0.0775;  // x of the collection plane
         const double xPerTDC = 0.0775; // TDC = 2MHZ; drift = 1.55e6 mm/s
         distance = start + xPerTDC * wire;  // here input is actually tdc number
     }
