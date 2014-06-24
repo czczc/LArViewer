@@ -50,29 +50,18 @@ GuiController::GuiController(const TGWindow *p, int w, int h)
     currentTheme = 0; // night theme
     currentDisplayOption = 1; // display raw signal
     currentInductionSig = 0;  // positive signal
-    // currentShowMC = false;  // do not show MC
-    // currentTrackId = 1;  // first track
+    currentShowMC = false;  // do not show MC
+    currentTrackId = 1;  // first track
 
-    // trackLineZ = new TLine(0,0,0,0);
-    // trackLineZ->SetLineColor(kRed);
-    // trackLineZ->SetLineWidth(2);
-    // trackStartPointZ = new TMarker(0,0,24);
-    // trackStartPointZ->SetMarkerColor(kWhite);
-    // trackStartPointZ->SetMarkerSize(1.0);
+    for (int i=0; i<3; i++) {
+        trackLine[i] = new TLine(0,0,0,0);
+        trackLine[i]->SetLineColor(kRed);
+        trackLine[i]->SetLineWidth(2);
+        trackStartPoint[i] = new TMarker(0,0,24);
+        trackStartPoint[i]->SetMarkerColor(kWhite);
+        trackStartPoint[i]->SetMarkerSize(1.0);
+    }
 
-    // trackLineU = new TLine(0,0,0,0);
-    // trackLineU->SetLineColor(kRed);
-    // trackLineU->SetLineWidth(2);
-    // trackStartPointU = new TMarker(0,0,24);
-    // trackStartPointU->SetMarkerColor(kWhite);
-    // trackStartPointU->SetMarkerSize(1.0);
-
-    // trackLineV = new TLine(0,0,0,0);
-    // trackLineV->SetLineColor(kRed);
-    // trackLineV->SetLineWidth(2);
-    // trackStartPointV = new TMarker(0,0,24);
-    // trackStartPointV->SetMarkerColor(kWhite);
-    // trackStartPointV->SetMarkerSize(1.0);
 
     mw = new MainWindow(p, w, h);
     vw = mw->fViewWindow;
@@ -91,8 +80,7 @@ GuiController::GuiController(const TGWindow *p, int w, int h)
 
 GuiController::~GuiController()
 {
-    // delete trackLineZ;
-    // delete trackStartPointZ;
+
 }
 
 void GuiController::InitConnections()
@@ -101,13 +89,15 @@ void GuiController::InitConnections()
 
     cw->fPrevButton->Connect("Clicked()", "GuiController", this, "Prev()");
     cw->fNextButton->Connect("Clicked()", "GuiController", this, "Next()");
+    cw->fEventEntry->Connect("ReturnPressed()", "GuiController", this, "Jump()");
+
     cw->fAutoZoomButton->Connect("Clicked()", "GuiController", this, "AutoZoom()");
     cw->fUnZoomButton->Connect("Clicked()", "GuiController", this, "UnZoom()");
     // cw->xrangeButton->Connect("Clicked()", "GuiController", this, "SyncXaxis()");
     // cw->zrangeButton->Connect("Clicked()", "GuiController", this, "UpdateZaxis()");
     // cw->inductionSigButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateInductionSig(int)");
     // cw->apaButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateAPA(int)");
-    // cw->fShowMCButton->Connect("Clicked()", "GuiController", this, "UpdateShowMC()");
+    cw->fShowMCButton->Connect("Clicked()", "GuiController", this, "UpdateShowMC()");
     // cw->paletteButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdatePalette(int)");
     // cw->displayButtonGroup->Connect("Clicked(int)", "GuiController", this, "UpdateDisplayOption(int)");
 
@@ -294,20 +284,20 @@ void GuiController::UnZoom(bool redraw)
 // }
 
 
-// void GuiController::UpdateShowMC()
-// {
-//     if (cw->fShowMCButton->IsDown()) {
-//         if (currentShowMC == true) return;
-//         currentShowMC = true;
-//         MCTrackSelected(currentTrackId);
-//     }
-//     else {
-//         if (currentShowMC == false) return;
-//         currentShowMC = false;
-//         HideTrack();
-//     }
+void GuiController::UpdateShowMC()
+{
+    if (cw->fShowMCButton->IsDown()) {
+        if (currentShowMC == true) return;
+        currentShowMC = true;
+        MCTrackSelected(currentTrackId);
+    }
+    else {
+        if (currentShowMC == false) return;
+        currentShowMC = false;
+        HideTrack();
+    }
 
-// }
+}
 
 //-------------------------------------------------
 void GuiController::SetTheme(int theme)
@@ -365,93 +355,76 @@ void GuiController::DrawPixels()
 }
 
 
-// void GuiController::DrawTrack(int id) 
-// {
-//     int i = event->trackIndex[id];
-//     // cout << i << " " << event->mc_startXYZT[i][0] << endl;
-//     trackLineZ->SetX1(event->mc_startXYZT[i][0]);
-//     trackLineZ->SetY1(event->mc_startXYZT[i][2]);
-//     trackLineZ->SetX2(event->mc_endXYZT[i][0]);
-//     trackLineZ->SetY2(event->mc_endXYZT[i][2]);
-
-//     trackStartPointZ->SetX(event->mc_startXYZT[i][0]);
-//     trackStartPointZ->SetY(event->mc_startXYZT[i][2]);
-
-//     can->cd(1);
-//     trackLineZ->Draw();
-//     trackStartPointZ->Draw();
+void GuiController::DrawTrack(int id) 
+{
+    int i = event->trackIndex[id];
+    // cout << i << " " << event->mc_startXYZT[i][0] << endl;
 
 
-//     trackLineU->SetX1(event->mc_startXYZT[i][0]);
-//     trackLineU->SetY1((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
-//     trackLineU->SetX2(event->mc_endXYZT[i][0]);
-//     trackLineU->SetY2((event->mc_endXYZT[i][1]-event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
+    const float angle = 60.*TMath::Pi()/180;
+    // const float start = MCGeometry::Projection(0, 0);
+    trackLine[0]->SetY1(event->mc_startXYZT[i][0]);
+    trackLine[0]->SetX1(-event->mc_startXYZT[i][1]*TMath::Sin(angle) + event->mc_startXYZT[i][2]*TMath::Cos(angle));
+    trackLine[0]->SetY2(event->mc_endXYZT[i][0]);
+    trackLine[0]->SetX2(-event->mc_endXYZT[i][1]*TMath::Sin(angle) + event->mc_endXYZT[i][2]*TMath::Cos(angle));
 
-//     trackStartPointU->SetX(event->mc_startXYZT[i][0]);
-//     trackStartPointU->SetY((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackStartPoint[0]->SetY(event->mc_startXYZT[i][0]);
+    trackStartPoint[0]->SetX(-event->mc_startXYZT[i][1]*TMath::Sin(angle) + event->mc_startXYZT[i][2]*TMath::Cos(angle));
 
-//     can->cd(2);
-//     trackLineU->Draw();
-//     trackStartPointU->Draw();
-
-
-//     trackLineV->SetX1(event->mc_startXYZT[i][0]);
-//     trackLineV->SetY1((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
-//     trackLineV->SetX2(event->mc_endXYZT[i][0]);
-//     trackLineV->SetY2((event->mc_endXYZT[i][1]+event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
-
-//     trackStartPointV->SetX(event->mc_startXYZT[i][0]);
-//     trackStartPointV->SetY((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
-
-//     can->cd(3);
-//     trackLineV->Draw();
-//     trackStartPointV->Draw();
-
-//     Modified();
-// }
-
-// void GuiController::HideTrack()
-// {
-//     float faraway = -1000.;
-//     trackLineZ->SetX1(faraway);
-//     trackLineZ->SetY1(faraway);
-//     trackLineZ->SetX2(faraway);
-//     trackLineZ->SetY2(faraway);
-
-//     trackStartPointZ->SetX(faraway);
-//     trackStartPointZ->SetY(faraway);
-
-//     can->cd(1);
-//     trackLineZ->Draw();
-//     trackStartPointZ->Draw();
+    can->cd(1);
+    trackLine[0]->Draw();
+    trackStartPoint[0]->Draw();
 
 
-//     trackLineU->SetX1(faraway);
-//     trackLineU->SetY1(faraway);
-//     trackLineU->SetX2(faraway);
-//     trackLineU->SetY2(faraway);
+    trackLine[1]->SetY1(event->mc_startXYZT[i][0]);
+    trackLine[1]->SetX1(event->mc_startXYZT[i][1]*TMath::Sin(angle) + event->mc_startXYZT[i][2]*TMath::Cos(angle));
+    trackLine[1]->SetY2(event->mc_endXYZT[i][0]);
+    trackLine[1]->SetX2(event->mc_endXYZT[i][1]*TMath::Sin(angle) + event->mc_endXYZT[i][2]*TMath::Cos(angle));
 
-//     trackStartPointU->SetX(faraway);
-//     trackStartPointU->SetY(faraway);
+    trackStartPoint[1]->SetY(event->mc_startXYZT[i][0]);
+    trackStartPoint[1]->SetX(event->mc_startXYZT[i][1]*TMath::Sin(angle) + event->mc_startXYZT[i][2]*TMath::Cos(angle));
 
-//     can->cd(2);
-//     trackLineU->Draw();
-//     trackStartPointU->Draw();
+    can->cd(2);
+    trackLine[1]->Draw();
+    trackStartPoint[1]->Draw();
+    // cout << event->mc_startXYZT[i][1] << ", " << event->mc_startXYZT[i][2] << endl;
+    // cout << event->mc_endXYZT[i][1] << ", " << event->mc_endXYZT[i][2] << endl;
 
-//     trackLineV->SetX1(faraway);
-//     trackLineV->SetY1(faraway);
-//     trackLineV->SetX2(faraway);
-//     trackLineV->SetY2(faraway);
 
-//     trackStartPointV->SetX(faraway);
-//     trackStartPointV->SetY(faraway);
+    trackLine[2]->SetX1(event->mc_startXYZT[i][2]);
+    trackLine[2]->SetY1(event->mc_startXYZT[i][0]);
+    trackLine[2]->SetX2(event->mc_endXYZT[i][2]);
+    trackLine[2]->SetY2(event->mc_endXYZT[i][0]);
 
-//     can->cd(3);
-//     trackLineV->Draw();
-//     trackStartPointV->Draw();
+    trackStartPoint[2]->SetX(event->mc_startXYZT[i][2]);
+    trackStartPoint[2]->SetY(event->mc_startXYZT[i][0]);
 
-//     Modified();
-// }
+    can->cd(3);
+    trackLine[2]->Draw();
+    trackStartPoint[2]->Draw();
+
+    Modified();
+}
+
+void GuiController::HideTrack()
+{
+    float faraway = -1000.;
+
+    for (int i=0; i<3; i++) {
+        trackLine[i]->SetX1(faraway);
+        trackLine[i]->SetY1(faraway);
+        trackLine[i]->SetX2(faraway);
+        trackLine[i]->SetY2(faraway);
+
+        trackStartPoint[i]->SetX(faraway);
+        trackStartPoint[i]->SetY(faraway);
+
+        can->cd(i+1);
+        trackLine[i]->Draw();
+        trackStartPoint[i]->Draw();
+    }
+    Modified();
+}
 
 //-------------------------------------------------
 void GuiController::Prev()
@@ -478,6 +451,19 @@ void GuiController::Next()
 }
 
 //-------------------------------------------------
+void GuiController::Jump()
+{
+    currentEventEntry = int(cw->fEventEntry->GetNumber());
+    if (currentEventEntry>=event->nEvents-1) {
+        currentEventEntry = event->nEvents-1;
+    }
+    else if (currentEventEntry < 0) {
+        currentEventEntry=0;
+    }
+    Reload();
+}
+
+//-------------------------------------------------
 void GuiController::Reload()
 {    
     cw->fEventEntry->SetNumber(currentEventEntry);
@@ -486,41 +472,17 @@ void GuiController::Reload()
     event->PrintInfo();
     iw->DrawEventInfo(event);
 
-    // InitTracksList();
     MCTrackSelected(1); // select the first track
-    // cw->fShowMCButton->SetState(kButtonUp);
-    // UpdateShowMC();
+    cw->fShowMCButton->SetState(kButtonUp);
+    UpdateShowMC();
     UnZoom(false);
     DrawPixels();
 }
-
-// //-------------------------------------------------
-// void GuiController::InitTracksList()
-// {   
-
-//     cw->fSiblingTracksListBox->RemoveAll();
-//     cw->fParentTracksListBox->RemoveAll();
-//     cw->fDaughterTracksListBox->RemoveAll();
-//     currentTrackId = event->mc_id[0];;
-
-//     int nPrimary = event->trackSiblings.at(0).size();
-//     cout << "primary particles: " << nPrimary << endl;
-//     for (int i=0; i<nPrimary; i++) {
-//         TGString name;
-//         int idx = event->trackSiblings.at(0).at(i);
-//         name.Form("%s (%.1f)", PDGName(event->mc_pdg[idx]).Data(), KE(event->mc_startMomentum[idx])*1000);
-//         int id = event->mc_id[idx];
-//         cw->fSiblingTracksListBox->AddEntry(name, id);
-//     }
-//     cw->fSiblingTracksListBox->Layout();
-// }
 
 //-------------------------------------------------
 void GuiController::MCTrackSelected(int id)
 {
     currentTrackId = id;
-    cw->fShowMCButton->SetState(kButtonDown);
-    // currentShowMC = true;
 
     cw->fDaughterTracksListBox->RemoveAll();
     int i = event->trackIndex[id];
@@ -558,7 +520,7 @@ void GuiController::MCTrackSelected(int id)
 
 
     cw->fSiblingTracksListBox->Select(id);
-    // DrawTrack(id);
+    if (currentShowMC) DrawTrack(id);
     cout << PDGName(event->mc_pdg[i]) << ": id: " << id << ", daughters: " << nDaughter << endl;
 }
 

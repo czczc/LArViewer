@@ -106,11 +106,12 @@ void MCEvent::InitBranchAddress()
 //----------------------------------------------------------------
 void MCEvent::InitHistograms()
 {
-    const double xPerTDC = 0.0775;
+    // const double xPerTDC = 0.0775;
+    const double xPerTDC = 0.0803;
     const int nTDC = 3200*3;
     double x_start = -0.6-3200*xPerTDC;
-    hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 2398, -202, -202+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
-    hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 2398,  0.2,  0.2+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
+    hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 2398, -101, -101+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
+    hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 2398,  -57,  -57+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
     hPixel[2] = new TH2F("hPixel_2", "X (drift distance) vs Z", 3455,  0.3,  0.3+3455*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
 
     hPixel[0]->GetYaxis()->SetTitle("x [cm]");
