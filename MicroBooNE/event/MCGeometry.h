@@ -8,14 +8,21 @@
 #define NCHANNELS 8254
 
 class MCGeometry {
+private: 
+    MCGeometry();
+    MCGeometry(MCGeometry const&) {};
+    void operator=(MCGeometry const&) {};
+
 public:
 
     MCChannel channels[NCHANNELS];
     TString mapFileName;
     std::map<int, int> wireToChannel; // hash map to find channel no. given wire hash
 
-    MCGeometry();
     virtual ~MCGeometry();
+
+    // singleton method
+    static MCGeometry& GetInstance() { static MCGeometry geom; return geom; }
 
     //  methods
     void ReadChanneleWireMap();

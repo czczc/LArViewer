@@ -17,7 +17,6 @@ public:
 
     //  methods
     TTree* Tree() { return simTree; }
-    MCGeometry* Geometry() { return geom; }
     void InitBranchAddress();
     void GetEntry(int i);
     void Reset();

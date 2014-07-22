@@ -133,7 +133,7 @@ void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *sele
         // else if (name == "hPixelVT") m = &(event->vBintoWireHash);
         // else { cout << "not recognized: " << name << endl; return;}
         int wirehash = (*m)[binx];
-        int channelNo = event->geom->wireToChannel[wirehash];
+        int channelNo = MCGeometry::GetInstance().wireToChannel[wirehash];
         cout 
             // << "event: " << ev
             << "x: " << xx

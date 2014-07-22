@@ -38,7 +38,7 @@ MCEvent::MCEvent(const char* dataFileName)
     }
     nEvents = simTree->GetEntries();
     cout << "total events: " << nEvents << endl;
-    geom = new MCGeometry();
+    geom =  &MCGeometry::GetInstance();
 
     optionDisplay = kRAW;      // default display raw signal
     optionInductionSignal = 1; // default draw positive signal only
