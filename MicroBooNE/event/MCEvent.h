@@ -58,6 +58,7 @@ public:
 
     int raw_Nhit;  // number of hit channels
     int raw_channelId[MAX_CHANNEL];  // hit channel id; size == raw_Nhit
+    int raw_baseline[MAX_CHANNEL];  // hit channel baseline; size == raw_Nhit
     int raw_charge[MAX_CHANNEL];  // hit channel charge (simple alg); size == raw_Nhit
     int raw_time[MAX_CHANNEL];  // hit channel time (simple alg); size == raw_Nhit
     std::vector<std::vector<int> > *raw_wfADC;

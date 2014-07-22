@@ -76,6 +76,7 @@ void MCEvent::InitBranchAddress()
 
     simTree->SetBranchAddress("raw_Nhit"     , &raw_Nhit);
     simTree->SetBranchAddress("raw_channelId", &raw_channelId);
+    simTree->SetBranchAddress("raw_baseline" , &raw_baseline);
     simTree->SetBranchAddress("raw_charge"   , &raw_charge);
     simTree->SetBranchAddress("raw_time"     , &raw_time);
     simTree->SetBranchAddress("raw_wfADC"    , &raw_wfADC);
@@ -112,7 +113,7 @@ void MCEvent::InitHistograms()
     double x_start = -0.6-3200*xPerTDC;
     hPixel[0] = new TH2F("hPixel_0", "X (drift distance) vs U", 2398, -101, -101+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
     hPixel[1] = new TH2F("hPixel_1", "X (drift distance) vs V", 2398,  -57,  -57+2398*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
-    hPixel[2] = new TH2F("hPixel_2", "X (drift distance) vs Z", 3455,  0.3,  0.3+3455*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
+    hPixel[2] = new TH2F("hPixel_2", "X (drift distance) vs Z", 3455,  0.15,  0.15+3455*0.3, nTDC, x_start, x_start+nTDC*xPerTDC);
 
     hPixel[0]->GetYaxis()->SetTitle("x [cm]");
     hPixel[1]->GetYaxis()->SetTitle("x [cm]");
@@ -221,7 +222,7 @@ void MCEvent::ProcessTracks()
 //----------------------------------------------------------------
 void MCEvent::FillPixel(int wirePlane)
 {
-    adc_thresh = 5.;
+    adc_thresh = 1.;
 
     if (wirePlane >= 3 or wirePlane < 0) {
         cout << "Plane " << wirePlane << "does not exist. exiting ..." << endl;
@@ -240,8 +241,8 @@ void MCEvent::FillPixel(int wirePlane)
 
             int wire = channel.wire;
             double x = geom->Projection(wirePlane, wire);
-            int ybin = h->GetYaxis()->FindBin(x);
-            (*m)[ybin] = channel.hash;
+            int xbin = h->GetXaxis()->FindBin(x);
+            (*m)[xbin] = channel.hash;
             int idx = 0;
             vector<int>& tdcs = (*raw_wfTDC).at(idx);
             vector<int>& adcs = (*raw_wfADC).at(idx);
@@ -257,10 +258,13 @@ void MCEvent::FillPixel(int wirePlane)
             for (int i_tdc=0; i_tdc<size_tdc; i_tdc++) {
                 double y = geom->Projection(MCGeometry::kX, tdcs[i_tdc]);
                 // cout << tpc << " " << tdcs[i_tdc] << " " << x << endl;
+                // int weight = adcs[i_tdc]-400;
                 int weight = adcs[i_tdc];
                 if (weight>1e4) {
                     cout << weight << endl;
                 }
+                if (weight<1) continue;
+                // if (wirePlane==0 || wirePlane==1) continue;
                 if (fabs(weight) < adc_thresh) {
                     continue; // removing noise, increasing draw speed.
                 }
@@ -417,14 +421,14 @@ void MCEvent::PrintInfo(int level)
         // cout << endl << endl;
 
         cout << "first hit channel non zero samples: ";
-        cout << (*raw_wfADC)[0].size() << endl;
-        for (size_t i=0; i<(*raw_wfADC)[0].size(); i++) {
-            cout << (*raw_wfADC)[0].at(i) << " ";
+        cout << (*raw_wfADC)[2].size() << endl;
+        for (size_t i=0; i<(*raw_wfADC)[2].size(); i++) {
+            cout << (*raw_wfADC)[2].at(i) << " ";
         }
         cout << endl << endl;
         cout << "tdc locations: ";
-        for (size_t i=0; i<(*raw_wfADC)[0].size(); i++) {
-            cout << (*raw_wfTDC)[0].at(i) << " ";
+        for (size_t i=0; i<(*raw_wfADC)[2].size(); i++) {
+            cout << (*raw_wfTDC)[2].at(i) << " ";
         }
         cout << endl << endl;
     }

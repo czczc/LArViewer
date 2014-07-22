@@ -282,9 +282,9 @@ void Gui3DController::AddTracks()
         if (p == 0) {
             continue; // skip unknown particles
         }
-        // if ( fabs(p->Charge()) < 1e-2 ) {
-        //     continue;  // skip neutral particles
-        // }
+        if ( fabs(p->Charge()) < 1e-2 ) {
+            continue;  // skip neutral particles
+        }
         rc = new TEveRecTrackD();
         rc->fV.Set(event->mc_startXYZT[i][0], event->mc_startXYZT[i][1], event->mc_startXYZT[i][2]);
         track = new TEveTrack(rc, list->GetPropagator());

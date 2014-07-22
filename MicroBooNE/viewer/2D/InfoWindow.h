@@ -23,7 +23,7 @@ public:
 
 
     void DrawEventInfo(MCEvent *ev);
-    // void DrawWire(int channelId, MCEvent *ev, int wirehash=0);
+    void DrawWire(int channelId, MCEvent *ev, int wirehash=0);
     
     TCanvas* can; 
     vector<TObject*> listOfDrawables;

@@ -51,7 +51,7 @@ public:
     // void UpdatePalette(int id);
     // void UpdateDisplayOption(int id);
     void MCTrackSelected(int id);
-    // void ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected);
+    void ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected);
 
     void AutoZoom(TH2F* hist, bool zoomY=true);
     void DrawTrack(int id);

@@ -109,42 +109,44 @@ void GuiController::InitConnections()
     // can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
     // can->GetPad(3)->Connect("RangeChanged()", "GuiController", this, "SyncRangeVT()");
 
-    // can->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "GuiController", 
-    //        this, "ProcessCanvasEvent(Int_t,Int_t,Int_t,TObject*)");
+    can->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "GuiController", 
+           this, "ProcessCanvasEvent(Int_t,Int_t,Int_t,TObject*)");
 
 }
 
 
-// void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected)
-// {
-//     if (ev == 11) { // clicked
-//         if (!(selected->IsA() == TH2F::Class())) return;
-//         TVirtualPad* pad = can->GetClickSelectedPad();
-//         double xx = pad->AbsPixeltoX(x);
-//         double yy = pad->AbsPixeltoY(y);
-//         TH2F *h = (TH2F*)selected;
-//         int biny = h->GetYaxis()->FindBin(yy);
-//         TString name = h->GetName();
-//         map<int, int> *m = 0;
-//              if (name == "hPixelZT") m = &(event->zBintoWireHash);
-//         else if (name == "hPixelUT") m = &(event->uBintoWireHash);
-//         else if (name == "hPixelVT") m = &(event->vBintoWireHash);
-//         else { cout << "not recognized: " << name << endl; return;}
-//         int wirehash = (*m)[biny];
-//         int channelNo = geom->wireToChannel[wirehash];
-//         cout 
-//             // << "event: " << ev
-//             << "x: " << xx
-//             << ", y: " << yy
-//             << ", h: " << name
-//             << ", biny: " << biny
-//             << ", wire hash: " << wirehash
-//             << ", channel: " << channelNo
-//             << endl;
-//         iw->DrawWire(channelNo, event, wirehash);
-//     }
+void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *selected)
+{
+    if (ev == 11) { // clicked
+        if (!(selected->IsA() == TH2F::Class())) return;
+        TVirtualPad* pad = can->GetClickSelectedPad();
+        int wirePlane = pad->GetNumber()-1;
+        double xx = pad->AbsPixeltoX(x);
+        double yy = pad->AbsPixeltoY(y);
+        TH2F *h = (TH2F*)selected;
+        int binx = h->GetXaxis()->FindBin(xx);
+        TString name = h->GetName();
+        map<int, int> *m = &(event->bintoWireHash[wirePlane]);
+        // map<int, int> *m = 0;
+        //      if (name == "hPixelZT") m = &(event->zBintoWireHash);
+        // else if (name == "hPixelUT") m = &(event->uBintoWireHash);
+        // else if (name == "hPixelVT") m = &(event->vBintoWireHash);
+        // else { cout << "not recognized: " << name << endl; return;}
+        int wirehash = (*m)[binx];
+        int channelNo = event->geom->wireToChannel[wirehash];
+        cout 
+            // << "event: " << ev
+            << "x: " << xx
+            << ", y: " << yy
+            << ", h: " << name
+            << ", binx: " << binx
+            << ", wire hash: " << wirehash
+            << ", channel: " << channelNo
+            << endl;
+        iw->DrawWire(channelNo, event, wirehash);
+    }
 
-// }
+}
 
 void GuiController::AutoZoom()
 {    
@@ -336,18 +338,21 @@ void GuiController::DrawPixels()
     event->FillPixel(MCGeometry::kU);
     h = event->hPixel[MCGeometry::kU];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
+    // h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     can->cd(2);
     event->FillPixel(MCGeometry::kV);
     h = event->hPixel[MCGeometry::kV];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
+    // h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     can->cd(3);
     event->FillPixel(MCGeometry::kZ);
     h = event->hPixel[MCGeometry::kZ];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
+    // h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     SetTheme(currentTheme);
@@ -574,7 +579,7 @@ void GuiController::AutoZoom(TH2F* hist, bool zoomX)
     for(Int_t i = 1; i <= hist->GetNbinsX(); i++){
         for(Int_t j = 1; j <= hist->GetNbinsY(); j++){
       
-            if(hist->GetBinContent(i, j) <= 1) continue;
+            if(hist->GetBinContent(i, j) <= 9) continue;
 
             if(i < xMin) xMin = i;
             if(j < yMin) yMin = j;

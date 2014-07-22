@@ -40,6 +40,7 @@ void MCGeometry::ReadChanneleWireMap()
     for (int i=0; i<NCHANNELS; i++) {
         infile >> c >> p >> w;
         channels[i].SetChannel(c, p, w);
+        wireToChannel[channels[i].hash] = channels[i].channelNo;
     }
     infile.close();
 }
