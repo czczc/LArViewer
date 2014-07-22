@@ -9,6 +9,8 @@
 
 class MCEvent;
 class TObject;
+class TH1F;
+class TH2F;
 
 class InfoWindow: public TRootEmbeddedCanvas
 {
@@ -24,6 +26,7 @@ public:
 
     void DrawEventInfo(MCEvent *ev);
     void DrawWire(int channelId, MCEvent *ev, int wirehash=0);
+    void AutoZoom(TH2F* hh, TH1F* h, int thresh=12);
     
     TCanvas* can; 
     vector<TObject*> listOfDrawables;

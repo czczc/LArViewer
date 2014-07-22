@@ -159,11 +159,11 @@ void GuiController::AutoZoom()
 
 void GuiController::UnZoom(bool redraw)
 {    
-    xMin_now = 1;
-    xMax_now = 9600;
-    event->hPixel[0]->GetYaxis()->SetRange(xMin_now, xMax_now); 
-    event->hPixel[1]->GetYaxis()->SetRange(xMin_now, xMax_now); 
-    event->hPixel[2]->GetYaxis()->SetRange(xMin_now, xMax_now); 
+    yMin_now = 1;
+    yMax_now = 9600;
+    event->hPixel[0]->GetYaxis()->SetRange(yMin_now, yMax_now); 
+    event->hPixel[1]->GetYaxis()->SetRange(yMin_now, yMax_now); 
+    event->hPixel[2]->GetYaxis()->SetRange(yMin_now, yMax_now); 
 
     event->hPixel[0]->GetXaxis()->SetRange(1, 2398); 
     event->hPixel[1]->GetXaxis()->SetRange(1, 2398); 
@@ -338,24 +338,25 @@ void GuiController::DrawPixels()
     event->FillPixel(MCGeometry::kU);
     h = event->hPixel[MCGeometry::kU];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
-    // h->GetYaxis()->SetRangeUser(0, 300);
+    h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     can->cd(2);
     event->FillPixel(MCGeometry::kV);
     h = event->hPixel[MCGeometry::kV];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
-    // h->GetYaxis()->SetRangeUser(0, 300);
+    h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     can->cd(3);
     event->FillPixel(MCGeometry::kZ);
     h = event->hPixel[MCGeometry::kZ];
     h->GetZaxis()->SetRangeUser(0, h->GetBinContent(h->GetMaximumBin())/2);
-    // h->GetYaxis()->SetRangeUser(0, 300);
+    h->GetYaxis()->SetRangeUser(0, 300);
     h->Draw("colz");
 
     SetTheme(currentTheme);
+    AutoZoom();
     Modified();
 }
 
@@ -480,7 +481,7 @@ void GuiController::Reload()
     MCTrackSelected(1); // select the first track
     cw->fShowMCButton->SetState(kButtonUp);
     UpdateShowMC();
-    UnZoom(false);
+    // UnZoom(false);
     DrawPixels();
 }
 
@@ -568,18 +569,19 @@ void GuiController::HandleFileMenu(int id)
 }
 
 //-------------------------------------------------
-void GuiController::AutoZoom(TH2F* hist, bool zoomX)
+void GuiController::AutoZoom(TH2F* hist, bool zoomY)
 {
     // zooms in on where the action is i.e., where there is counts
     Int_t xMin = hist->GetNbinsX();
     Int_t xMax = 0;
     Int_t yMin = hist->GetNbinsY();
     Int_t yMax = 0;
-
+    int thresh = 12;
+    
     for(Int_t i = 1; i <= hist->GetNbinsX(); i++){
         for(Int_t j = 1; j <= hist->GetNbinsY(); j++){
       
-            if(hist->GetBinContent(i, j) <= 9) continue;
+            if(hist->GetBinContent(i, j) <= thresh) continue;
 
             if(i < xMin) xMin = i;
             if(j < yMin) yMin = j;
@@ -587,15 +589,16 @@ void GuiController::AutoZoom(TH2F* hist, bool zoomX)
             if(j > yMax) yMax = j;
         }
     }
+    // cout << xMin << ", " << xMax << endl;
 
-    hist->GetYaxis()->SetRange(yMin, yMax);
-    if (zoomX) {
-        hist->GetXaxis()->SetRange(xMin, xMax);
-        xMin_now = xMin;
-        xMax_now = xMax;
+    hist->GetXaxis()->SetRange(xMin, xMax);
+    if (zoomY) {
+        hist->GetYaxis()->SetRange(yMin, yMax);
+        yMin_now = yMin;
+        yMax_now = yMax;
     }
     else {
-        hist->GetXaxis()->SetRange(xMin_now, xMax_now);
+        hist->GetYaxis()->SetRange(yMin_now, yMax_now);
     }
     // hist->GetZaxis()->SetRangeUser(0, hist->GetBinContent(hist->GetMaximumBin())/2);
 }

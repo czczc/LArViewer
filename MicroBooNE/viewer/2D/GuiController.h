@@ -74,7 +74,7 @@ public:
     TString baseDir;
     TDatabasePDG *dbPDG;
 
-    int xMin_now, xMax_now;
+    int yMin_now, yMax_now;
 
     TLine* trackLine[3];
     TMarker* trackStartPoint[3];

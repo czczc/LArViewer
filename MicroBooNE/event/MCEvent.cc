@@ -22,8 +22,8 @@ MCEvent::MCEvent(const char* dataFileName)
 
     raw_wfADC = new std::vector<std::vector<int> >;
     raw_wfTDC = new std::vector<std::vector<int> >;
-    // calib_wfADC = new std::vector<std::vector<int> >;
-    // calib_wfTDC = new std::vector<std::vector<int> >;
+    calib_wfADC = new std::vector<std::vector<int> >;
+    calib_wfTDC = new std::vector<std::vector<int> >;
     mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
 
     rootFile = new TFile(dataFileName);
@@ -57,8 +57,8 @@ MCEvent::~MCEvent()
 
     delete raw_wfADC;
     delete raw_wfTDC;
-    // delete calib_wfADC;
-    // delete calib_wfTDC;
+    delete calib_wfADC;
+    delete calib_wfTDC;
     delete mc_daughters;
 
     rootFile->Close();
@@ -82,10 +82,10 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("raw_wfADC"    , &raw_wfADC);
     simTree->SetBranchAddress("raw_wfTDC"    , &raw_wfTDC);
 
-    // simTree->SetBranchAddress("calib_Nhit"     , &calib_Nhit);
-    // simTree->SetBranchAddress("calib_channelId", &calib_channelId);
-    // simTree->SetBranchAddress("calib_wfADC"    , &calib_wfADC);
-    // simTree->SetBranchAddress("calib_wfTDC"    , &calib_wfTDC);
+    simTree->SetBranchAddress("calib_Nhit"     , &calib_Nhit);
+    simTree->SetBranchAddress("calib_channelId", &calib_channelId);
+    simTree->SetBranchAddress("calib_wfADC"    , &calib_wfADC);
+    simTree->SetBranchAddress("calib_wfTDC"    , &calib_wfTDC);
 
     simTree->SetBranchAddress("mc_Ntrack"       , &mc_Ntrack);
     simTree->SetBranchAddress("mc_id"           , &mc_id);
@@ -97,10 +97,11 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("mc_startMomentum", &mc_startMomentum);
     simTree->SetBranchAddress("mc_endMomentum"  , &mc_endMomentum);
 
-    // simTree->SetBranchAddress("no_hits"    , &no_hits);
-    // simTree->SetBranchAddress("hit_channel", &hit_channel);
-    // simTree->SetBranchAddress("hit_peakT"  , &hit_peakT);
-    // simTree->SetBranchAddress("hit_charge" , &hit_charge);
+    simTree->SetBranchAddress("no_hits"    , &no_hits);
+    simTree->SetBranchAddress("hit_channel", &hit_channel);
+    simTree->SetBranchAddress("hit_plane", &hit_channel);
+    simTree->SetBranchAddress("hit_peakT"  , &hit_peakT);
+    simTree->SetBranchAddress("hit_charge" , &hit_charge);
 
 }
 
@@ -130,8 +131,8 @@ void MCEvent::Reset()
 {
     (*raw_wfADC).clear();
     (*raw_wfTDC).clear();
-    // (*calib_wfADC).clear();
-    // (*calib_wfTDC).clear();
+    (*calib_wfADC).clear();
+    (*calib_wfTDC).clear();
     (*mc_daughters).clear();
 
     trackIndex.clear();
@@ -164,7 +165,6 @@ void MCEvent::GetEntry(int entry)
     Reset();
     simTree->GetEntry(entry);
     ProcessTracks();
-    // ProcessChannels();
 
     currentEventEntry = entry;
 }

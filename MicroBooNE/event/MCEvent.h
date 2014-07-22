@@ -63,10 +63,10 @@ public:
     std::vector<std::vector<int> > *raw_wfADC;
     std::vector<std::vector<int> > *raw_wfTDC;
 
-    // int calib_Nhit;  // number of hit channels
-    // int calib_channelId[MAX_CHANNEL];  // hit channel id; size == raw_Nhit
-    // std::vector<std::vector<int> > *calib_wfADC;
-    // std::vector<std::vector<int> > *calib_wfTDC;
+    int calib_Nhit;  // number of hit channels
+    int calib_channelId[MAX_CHANNEL];  // hit channel id; size == raw_Nhit
+    std::vector<std::vector<int> > *calib_wfADC;
+    std::vector<std::vector<int> > *calib_wfTDC;
 
     int mc_Ntrack;  // number of tracks in MC
     int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
@@ -78,10 +78,11 @@ public:
     float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
     std::vector<std::vector<int> > *mc_daughters;  // daughters id of this track; vector
 
-//     int    no_hits;                  //number of hits
-//     int    hit_channel[MAX_HITS];    //channel ID
-//     float  hit_peakT[MAX_HITS];      //peak time
-//     float  hit_charge[MAX_HITS];     //charge (area)
+    int    no_hits;                  //number of hits
+    int    hit_channel[MAX_HITS];    //channel ID
+    int    hit_plane[MAX_HITS];    //channel ID
+    float  hit_peakT[MAX_HITS];      //peak time
+    float  hit_charge[MAX_HITS];     //charge (area)
 
 //     // derived variables
 //     int raw_NZchannels;

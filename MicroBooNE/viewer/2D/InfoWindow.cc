@@ -116,25 +116,26 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
         h->SetBinContent(tdcs[i], adcs[i]);
     }
     h->Draw("same");
-    hh->GetXaxis()->SetRangeUser(tdcs.at(0)-10, tdcs.at(tdcs.size()-1)+10);
+    // hh->GetXaxis()->SetRangeUser(tdcs.at(0)-10, tdcs.at(tdcs.size()-1)+10);
     hh->GetYaxis()->SetRangeUser(h->GetMinimum()-10, h->GetMaximum()*1.5);
+    AutoZoom(hh, h);
 
-    // // Calibrated signal
-    // int id2 = TMath::BinarySearch(ev->calib_Nhit, ev->calib_channelId, channelId);
-    // if (!(ev->calib_channelId[id2] == channelId)) {
-    //     cout << "cannot find calib channel " << channelId << endl;
-    //     return;
-    // }
-    // vector<int>& tdcs2 = (*(ev->calib_wfTDC)).at(id2);
-    // vector<int>& adcs2 = (*(ev->calib_wfADC)).at(id2);
-    // int size_tdc2 = tdcs2.size();
-    // TH1F *h2 = new TH1F(name+"_calib", title, 3200, 0, 3200); 
-    // listOfDrawables.push_back(h2);
-    // h2->SetLineColor(colors[1]);
-    // for (int i=0; i<size_tdc2; i++) {
-    //     h2->SetBinContent(tdcs2[i], adcs2[i]);
-    // }
-    // h2->Draw("same");
+    // Calibrated signal
+    int id2 = TMath::BinarySearch(ev->calib_Nhit, ev->calib_channelId, channelId);
+    if (!(ev->calib_channelId[id2] == channelId)) {
+        cout << "cannot find calib channel " << channelId << endl;
+        return;
+    }
+    vector<int>& tdcs2 = (*(ev->calib_wfTDC)).at(id2);
+    vector<int>& adcs2 = (*(ev->calib_wfADC)).at(id2);
+    int size_tdc2 = tdcs2.size();
+    TH1F *h2 = new TH1F(name+"_calib", title, 9600, 0, 9600); 
+    listOfDrawables.push_back(h2);
+    h2->SetLineColor(colors[1]);
+    for (int i=0; i<size_tdc2; i++) {
+        h2->SetBinContent(tdcs2[i], adcs2[i]);
+    }
+    h2->Draw("same");
 
     // // Hits
     // for (int i=0; i<ev->no_hits; i++) {
@@ -149,6 +150,23 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
     // }
 
     UpdateCanvas();
+}
+
+
+//------------------------------------------------------
+void InfoWindow::AutoZoom(TH2F* hh, TH1F* h, int thresh)
+{
+    Int_t xMin = h->GetNbinsX();
+    Int_t xMax = 0;
+
+    for(Int_t i = 1; i <= h->GetNbinsX(); i++){
+        if(fabs(h->GetBinContent(i)) <= thresh) continue;
+        if(i < xMin) xMin = i;
+        if(i > xMax) xMax = i;
+    }
+    // cout << xMin << ", " << xMax << endl;
+
+    hh->GetXaxis()->SetRange(xMin-10, xMax+10);
 }
 
 //------------------------------------------------------
