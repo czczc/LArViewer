@@ -94,7 +94,7 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
     // Container
     TString name = Form("channel_%i", channelId);
     TString title = Form("Channel %i: Plane %i, Wire %i", channelId, plane, wire);
-    TH2F *hh = new TH2F(name, title, 9600, 0, 9600, 100, -500, 500); 
+    TH2F *hh = new TH2F(name, title, 9600, 0+0.5, 9600+0.5, 100, -500, 500); 
     listOfDrawables.push_back(hh);
     hh->Draw();
 
@@ -109,7 +109,7 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
     vector<int>& tdcs = (*(ev->raw_wfTDC)).at(id);
     vector<int>& adcs = (*(ev->raw_wfADC)).at(id);
     int size_tdc = tdcs.size();
-    TH1F *h = new TH1F(name+"_wf", title, 9600, 0, 9600); 
+    TH1F *h = new TH1F(name+"_wf", title, 9600+0.5, 0, 9600+0.5); 
     listOfDrawables.push_back(h);
     h->SetLineColor(colors[0]);
     for (int i=0; i<size_tdc; i++) {
@@ -129,7 +129,7 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
     vector<int>& tdcs2 = (*(ev->calib_wfTDC)).at(id2);
     vector<int>& adcs2 = (*(ev->calib_wfADC)).at(id2);
     int size_tdc2 = tdcs2.size();
-    TH1F *h2 = new TH1F(name+"_calib", title, 9600, 0, 9600); 
+    TH1F *h2 = new TH1F(name+"_calib", title, 9600, 0+0.5, 9600+0.5); 
     listOfDrawables.push_back(h2);
     h2->SetLineColor(colors[1]);
     for (int i=0; i<size_tdc2; i++) {
@@ -137,17 +137,17 @@ void InfoWindow::DrawWire(int channelId, MCEvent *ev, int wirehash)
     }
     h2->Draw("same");
 
-    // // Hits
-    // for (int i=0; i<ev->no_hits; i++) {
-    //     if (!(channelId == ev->hit_channel[i])) continue;
-    //     float pt = ev->hit_peakT[i];
-    //     TLine *l = new TLine(pt, h->GetMinimum()-10, pt, h->GetMaximum()*1.5);
-    //     listOfDrawables.push_back(l);
-    //     l->SetLineStyle(3);
-    //     l->SetLineColor(colors[2]);
-    //     l->SetLineWidth(2);
-    //     l->Draw();
-    // }
+    // Hits
+    for (int i=0; i<ev->no_hits; i++) {
+        if (!(channelId == ev->hit_channel[i])) continue;
+        float pt = ev->hit_peakT[i];
+        TLine *l = new TLine(pt, h->GetMinimum()-10, pt, h->GetMaximum()*1.5);
+        listOfDrawables.push_back(l);
+        l->SetLineStyle(3);
+        l->SetLineColor(colors[2]);
+        l->SetLineWidth(2);
+        l->Draw();
+    }
 
     UpdateCanvas();
 }

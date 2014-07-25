@@ -63,7 +63,6 @@ MCEvent::~MCEvent()
 
     rootFile->Close();
     delete rootFile;
-    delete geom;
     
 }
 
@@ -90,6 +89,7 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("mc_Ntrack"       , &mc_Ntrack);
     simTree->SetBranchAddress("mc_id"           , &mc_id);
     simTree->SetBranchAddress("mc_pdg"          , &mc_pdg);
+    simTree->SetBranchAddress("mc_process"      , &mc_process);
     simTree->SetBranchAddress("mc_mother"       , &mc_mother);
     simTree->SetBranchAddress("mc_daughters"    , &mc_daughters);
     simTree->SetBranchAddress("mc_startXYZT"    , &mc_startXYZT);
@@ -97,11 +97,62 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("mc_startMomentum", &mc_startMomentum);
     simTree->SetBranchAddress("mc_endMomentum"  , &mc_endMomentum);
 
+
+    simTree->SetBranchAddress("mc_isnu"  , &mc_isnu);
+    simTree->SetBranchAddress("mc_nGeniePrimaries"  , &mc_nGeniePrimaries);
+    simTree->SetBranchAddress("mc_nu_pdg"  , &mc_nu_pdg);
+    simTree->SetBranchAddress("mc_nu_ccnc"  , &mc_nu_ccnc);
+    simTree->SetBranchAddress("mc_nu_mode"  , &mc_nu_mode);
+    simTree->SetBranchAddress("mc_nu_intType"  , &mc_nu_intType);
+    simTree->SetBranchAddress("mc_nu_target"  , &mc_nu_target);
+    simTree->SetBranchAddress("mc_hitnuc"  , &mc_hitnuc);
+    simTree->SetBranchAddress("mc_hitquark"  , &mc_hitquark);
+    simTree->SetBranchAddress("mc_nu_Q2"  , &mc_nu_Q2);
+    simTree->SetBranchAddress("mc_nu_W"  , &mc_nu_W);
+    simTree->SetBranchAddress("mc_nu_X"  , &mc_nu_X);
+    simTree->SetBranchAddress("mc_nu_Y"  , &mc_nu_Y);
+    simTree->SetBranchAddress("mc_nu_Pt"  , &mc_nu_Pt);
+    simTree->SetBranchAddress("mc_nu_X"  , &mc_nu_X);
+    simTree->SetBranchAddress("mc_nu_pos"  , &mc_nu_pos);
+    simTree->SetBranchAddress("mc_nu_mom"  , &mc_nu_mom);
+
     simTree->SetBranchAddress("no_hits"    , &no_hits);
     simTree->SetBranchAddress("hit_channel", &hit_channel);
-    simTree->SetBranchAddress("hit_plane", &hit_channel);
+    simTree->SetBranchAddress("hit_plane"  , &hit_plane);
     simTree->SetBranchAddress("hit_peakT"  , &hit_peakT);
     simTree->SetBranchAddress("hit_charge" , &hit_charge);
+
+    for (size_t i=0; i<1; i++) {
+        TString name = "trackkalmanhit";
+        simTree->SetBranchAddress((name+"_nTrack"    ).Data(), &trk_nTrack[i]);
+        simTree->SetBranchAddress((name+"_nHit"      ).Data(), &trk_nHit[i]);
+        simTree->SetBranchAddress((name+"_length"    ).Data(), &trk_length[i]);
+        simTree->SetBranchAddress((name+"_start_xyz" ).Data(), &trk_start_xyz[i]);
+        simTree->SetBranchAddress((name+"_end_xyz"   ).Data(), &trk_end_xyz[i]);
+        simTree->SetBranchAddress((name+"_start_dxyz").Data(), &trk_start_dxyz[i]);
+        simTree->SetBranchAddress((name+"_end_dxyz"  ).Data(), &trk_end_dxyz[i]);
+
+        simTree->SetBranchAddress((name+"_points_x" ).Data(), &trk_points_x[i]);
+        simTree->SetBranchAddress((name+"_points_y" ).Data(), &trk_points_y[i]);
+        simTree->SetBranchAddress((name+"_points_z" ).Data(), &trk_points_z[i]);
+
+        for (int j=0; j<3; j++) {
+            TString caloName;
+            caloName.Form("%s_calo%i_KE", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_KE[i][j]);
+            caloName.Form("%s_calo%i_range", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_range[i][j]);
+            caloName.Form("%s_calo%i_nHit", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_nHit[i][j]);
+            caloName.Form("%s_calo%i_dedx", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_dedx[i][j]);
+            caloName.Form("%s_calo%i_dqdx", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_dqdx[i][j]);
+            caloName.Form("%s_calo%i_resRange", name.Data(), j);
+            simTree->SetBranchAddress(caloName.Data(), &trk_calo_resRange[i][j]);
+        }
+        
+    }
 
 }
 

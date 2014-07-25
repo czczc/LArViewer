@@ -154,6 +154,13 @@ ControlWindow::ControlWindow(const TGWindow *p, int w, int h)
                 fDaughterTracksListBox->Resize(w/2, daughterHeight);
             }
         }
+        TGLabel *processLabel = new TGLabel(mcGroupFrame, 
+            "Process List\n\
+   1.primary  2.compt  3.phot  4.annihil  5.eIoni\n\
+   6.eBrem  7.conv  8.muIoni  9.muMinusCaptureAtRest\n\
+   10.NeutronInelastic  11.nCapture  12.hadElastic");
+        mcGroupFrame->AddFrame(processLabel, new TGLayoutHints(kLHintsTop | kLHintsExpandX, 2, 2, 2, 2));
+
     }
 
     // // Palette Selection

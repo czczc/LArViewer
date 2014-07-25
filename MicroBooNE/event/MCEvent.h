@@ -38,6 +38,7 @@ public:
         MAX_CHANNEL = 8254,
         MAX_TRACKS = 3000,
         MAX_HITS = 20000,
+        MAX_TRACKER = 10,
     };
 
     enum DISPLAY {
@@ -71,6 +72,7 @@ public:
     int mc_Ntrack;  // number of tracks in MC
     int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
     int mc_pdg[MAX_TRACKS];  // track particle pdg; size == mc_Ntrack
+    int mc_process[MAX_TRACKS];  // track generation process code; size == mc_Ntrack
     int mc_mother[MAX_TRACKS];  // mother id of this track; size == mc_Ntrack
     float mc_startXYZT[MAX_TRACKS][4];  // start position of this track; size == mc_Ntrack
     float mc_endXYZT[MAX_TRACKS][4];  // end position of this track; size == mc_Ntrack
@@ -78,11 +80,49 @@ public:
     float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
     std::vector<std::vector<int> > *mc_daughters;  // daughters id of this track; vector
 
+    int mc_isnu; // is neutrino interaction
+    int mc_nGeniePrimaries; // number of Genie primaries
+    int mc_nu_pdg; // pdg code of neutrino
+    int mc_nu_ccnc; // cc or nc
+    int mc_nu_mode; // mode: http://nusoft.fnal.gov/larsoft/doxsvn/html/MCNeutrino_8h_source.html
+    int mc_nu_intType; // interaction type
+    int mc_nu_target; // target interaction
+    int mc_hitnuc; // hit nucleon
+    int mc_hitquark; // hit quark
+    double mc_nu_Q2; // Q^2
+    double mc_nu_W; // W
+    double mc_nu_X; // X
+    double mc_nu_Y; // Y
+    double mc_nu_Pt; // Pt
+    double mc_nu_Theta; // angle relative to lepton
+    float mc_nu_pos[4];  // interaction position of nu
+    float mc_nu_mom[4];  // interaction momentum of nu
+
     int    no_hits;                  //number of hits
     int    hit_channel[MAX_HITS];    //channel ID
     int    hit_plane[MAX_HITS];    //channel ID
     float  hit_peakT[MAX_HITS];      //peak time
     float  hit_charge[MAX_HITS];     //charge (area)
+
+    int trk_nTrack[MAX_TRACKER]; // no. of tracks of each tracker.
+    std::vector<int>* trk_nHit[MAX_TRACKER];  // no. of hits of each track
+    std::vector<double>* trk_length[MAX_TRACKER];  // length of each track
+    std::vector<std::vector<double> >* trk_start_xyz[MAX_TRACKER];  // position of start vertex
+    std::vector<std::vector<double> >* trk_end_xyz[MAX_TRACKER];  // position of end vertex
+    std::vector<std::vector<double> >* trk_start_dxyz[MAX_TRACKER];  // direction of start vertex
+    std::vector<std::vector<double> >* trk_end_dxyz[MAX_TRACKER];  // direction of end vertex
+
+    std::vector<std::vector<double> >* trk_points_x[MAX_TRACKER];  // position of all points on trajectory
+    std::vector<std::vector<double> >* trk_points_y[MAX_TRACKER];  // position of all points on trajectory
+    std::vector<std::vector<double> >* trk_points_z[MAX_TRACKER];  // position of all points on trajectory
+
+    std::vector<double>* trk_calo_KE[MAX_TRACKER][3];  // KE of calorimetry from each plan of each trk
+    std::vector<double>* trk_calo_range[MAX_TRACKER][3];  // Range of calorimetry from each plan of each trk
+    std::vector<int>* trk_calo_nHit[MAX_TRACKER][3];  // hits of calorimetry from each plan of each trk
+    std::vector<std::vector<double> >* trk_calo_dedx[MAX_TRACKER][3];  // dedx of calorimetry from each plan of each trk
+    std::vector<std::vector<double> >* trk_calo_dqdx[MAX_TRACKER][3];  // dqdx of calorimetry from each plan of each trk
+    std::vector<std::vector<double> >* trk_calo_resRange[MAX_TRACKER][3];  // residual range of calorimetry from each plan of each trk
+
 
 //     // derived variables
 //     int raw_NZchannels;

@@ -69,6 +69,7 @@ public:
     InfoWindow    *iw;
     MCEvent       *event;
     // MCGeometry *geom;
+    TCanvas *can_track;
 
     TCanvas *can;
     TString baseDir;

@@ -41,6 +41,8 @@ using namespace std;
 
 GuiController::GuiController(const TGWindow *p, int w, int h)
 {
+    can_track = new TCanvas;
+    
     baseDir = baseDir + gSystem->DirName(__FILE__) + "/../..";
     event = 0;
 
@@ -483,6 +485,10 @@ void GuiController::Reload()
     UpdateShowMC();
     // UnZoom(false);
     DrawPixels();
+    can_track->cd();
+    event->hPixel[MCGeometry::kU]->Draw("colz");
+    can_track->Modified();
+    can_track->Update();
 }
 
 //-------------------------------------------------
@@ -496,7 +502,7 @@ void GuiController::MCTrackSelected(int id)
     for (int j=0; j<nDaughter; j++) {
         int idx = event->trackChildren.at(i).at(j);
         TGString name;
-        name.Form("%s (%.1f)", PDGName(event->mc_pdg[idx]).Data(), KE(event->mc_startMomentum[idx])*1000);
+        name.Form("%s [%d] (%.1f)", PDGName(event->mc_pdg[idx]).Data(), event->mc_process[idx], KE(event->mc_startMomentum[idx])*1000);
         cw->fDaughterTracksListBox->AddEntry(name, event->mc_id[idx]);
         // cout << name.Data() << event->mc_id[idx] << endl;
     }
@@ -507,7 +513,7 @@ void GuiController::MCTrackSelected(int id)
     for (int j=0; j<nParent; j++) {
         int idx = event->trackParents.at(i).at(j);
         TGString name;
-        name.Form("%s (%.1f)", PDGName(event->mc_pdg[idx]).Data(), KE(event->mc_startMomentum[idx])*1000);
+        name.Form("%s [%d] (%.1f)", PDGName(event->mc_pdg[idx]).Data(), event->mc_process[idx], KE(event->mc_startMomentum[idx])*1000);
         cw->fParentTracksListBox->AddEntry(name, event->mc_id[idx]);
         // cout << name.Data() << event->mc_id[idx] << endl;
     }
@@ -518,7 +524,7 @@ void GuiController::MCTrackSelected(int id)
     for (int j=0; j<nSiblings; j++) {
         int idx = event->trackSiblings.at(i).at(j);
         TGString name;
-        name.Form("%s (%.1f)", PDGName(event->mc_pdg[idx]).Data(), KE(event->mc_startMomentum[idx])*1000);
+        name.Form("%s [%d] (%.1f)", PDGName(event->mc_pdg[idx]).Data(), event->mc_process[idx], KE(event->mc_startMomentum[idx])*1000);
         cw->fSiblingTracksListBox->AddEntry(name, event->mc_id[idx]);
         // cout << name.Data() << event->mc_id[idx] << endl;
     }
@@ -577,7 +583,7 @@ void GuiController::AutoZoom(TH2F* hist, bool zoomY)
     Int_t yMin = hist->GetNbinsY();
     Int_t yMax = 0;
     int thresh = 12;
-    
+
     for(Int_t i = 1; i <= hist->GetNbinsX(); i++){
         for(Int_t j = 1; j <= hist->GetNbinsY(); j++){
       
