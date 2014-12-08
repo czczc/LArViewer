@@ -26,6 +26,27 @@ MCEvent::MCEvent(const char* dataFileName)
     calib_wfTDC = new std::vector<std::vector<int> >;
     mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
 
+    for (int i=0; i<MAX_TRACKER; i++) {
+        trk_nHit[i] = new std::vector<int>;
+        trk_length[i] = new std::vector<double>;
+        trk_start_xyz[i] = new std::vector<std::vector<double> >;
+        trk_end_xyz[i] = new std::vector<std::vector<double> >;
+        trk_start_dxyz[i] = new std::vector<std::vector<double> >;
+        trk_end_dxyz[i] = new std::vector<std::vector<double> >;
+        trk_points_x[i] = new std::vector<std::vector<double> >;
+        trk_points_y[i] = new std::vector<std::vector<double> >;
+        trk_points_z[i] = new std::vector<std::vector<double> >;
+        for (int j=0; j<3; j++) {
+            trk_calo_KE[i][j] = new std::vector<double>;
+            trk_calo_range[i][j] = new std::vector<double>;
+            trk_calo_nHit[i][j] = new std::vector<int>;
+            trk_calo_dedx[i][j] = new std::vector<std::vector<double> >;
+            trk_calo_dqdx[i][j] = new std::vector<std::vector<double> >;
+            trk_calo_resRange[i][j] = new std::vector<std::vector<double> >;
+
+        }
+    }
+
     rootFile = new TFile(dataFileName);
     if (rootFile->IsZombie()) {
         cout << "Data file " << dataFileName << " Does NOT exist! exiting ..." << endl;
@@ -60,6 +81,27 @@ MCEvent::~MCEvent()
     delete calib_wfADC;
     delete calib_wfTDC;
     delete mc_daughters;
+
+    for (int i=0; i<MAX_TRACKER; i++) {
+        delete trk_nHit[i];
+        delete trk_length[i];
+        delete trk_start_xyz[i];
+        delete trk_end_xyz[i];
+        delete trk_start_dxyz[i];
+        delete trk_end_dxyz[i];
+        delete trk_points_x[i];
+        delete trk_points_y[i];
+        delete trk_points_z[i];
+        for (int j=0; j<3; j++) {
+            delete trk_calo_KE[i][j];
+            delete trk_calo_range[i][j];
+            delete trk_calo_nHit[i][j];
+            delete trk_calo_dedx[i][j];
+            delete trk_calo_dqdx[i][j];
+            delete trk_calo_resRange[i][j];
+
+        }
+    }
 
     rootFile->Close();
     delete rootFile;
@@ -185,6 +227,27 @@ void MCEvent::Reset()
     (*calib_wfADC).clear();
     (*calib_wfTDC).clear();
     (*mc_daughters).clear();
+    for (int i=0; i<MAX_TRACKER; i++) {
+        trk_nTrack[i] = -1;
+        (*trk_nHit[i]).clear();
+        (*trk_length[i]).clear();
+        (*trk_start_xyz[i]).clear();
+        (*trk_end_xyz[i]).clear();
+        (*trk_start_dxyz[i]).clear();
+        (*trk_end_dxyz[i]).clear();
+        (*trk_points_x[i]).clear();
+        (*trk_points_y[i]).clear();
+        (*trk_points_z[i]).clear();
+        for (int j=0; j<3; j++) {
+            (*trk_calo_KE[i][j]).clear();
+            (*trk_calo_range[i][j]).clear();
+            (*trk_calo_nHit[i][j]).clear();
+            (*trk_calo_dedx[i][j]).clear();
+            (*trk_calo_dqdx[i][j]).clear();
+            (*trk_calo_resRange[i][j]).clear();
+
+        }
+    }
 
     trackIndex.clear();
     trackParents.clear();

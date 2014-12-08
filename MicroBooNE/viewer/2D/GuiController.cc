@@ -25,6 +25,7 @@
 #include "TFrame.h"
 #include "TColor.h"
 #include "TH2F.h"
+#include "TH3F.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
 #include "TLine.h"
@@ -42,7 +43,7 @@ using namespace std;
 GuiController::GuiController(const TGWindow *p, int w, int h)
 {
     can_track = new TCanvas;
-    
+
     baseDir = baseDir + gSystem->DirName(__FILE__) + "/../..";
     event = 0;
 
@@ -486,7 +487,12 @@ void GuiController::Reload()
     // UnZoom(false);
     DrawPixels();
     can_track->cd();
-    event->hPixel[MCGeometry::kU]->Draw("colz");
+    TH3F *h3 = new TH3F("h3", "h3", 100, -0.6, 256, 100, -115.5, 117.5, 100, 0, 1037);
+    h3->Draw("glbox");
+    TString drawString("trackkalmanhit_points_z:trackkalmanhit_points_y:trackkalmanhit_points_x");
+    TString cutString;
+    cutString.Form("Entry$==%i", currentEventEntry);
+    event->simTree->Draw(drawString.Data(), cutString.Data());
     can_track->Modified();
     can_track->Update();
 }

@@ -23,6 +23,7 @@ public:
     void InitEvent();
     void Reload();
     void AddTracks();
+    void AddRecoTracks();
     void AddProjectionView();
     void Run();
 
@@ -35,6 +36,7 @@ public:
     int currentEvent;
     TDatabasePDG *dbPDG;
     TEveTrackList *list;
+    TEveTrackList *recoTrackList;
 
     // GUIs
     TGMainFrame        *frmMain;

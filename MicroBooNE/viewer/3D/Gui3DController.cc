@@ -33,6 +33,7 @@ Gui3DController::Gui3DController()
 {
     dbPDG = new TDatabasePDG();
     list = 0;
+    recoTrackList = 0;
     baseDir = baseDir + gSystem->DirName(__FILE__) + "/../..";
 
     TEveManager::Create();
@@ -246,9 +247,10 @@ void Gui3DController::Reload()
 {
     eventEntry->SetNumber(currentEvent);
     event->GetEntry(currentEvent);
-    // event->PrintInfo(1);
-    event->PrintInfo();
+    event->PrintInfo(1);
+    // event->PrintInfo();
     AddTracks();
+    AddRecoTracks();
     gEve->DoRedraw3D();
 }
 
@@ -297,6 +299,56 @@ void Gui3DController::AddTracks()
         pm->fV.Set(event->mc_endXYZT[i][0], event->mc_endXYZT[i][1], event->mc_endXYZT[i][2]);
         track->AddPathMark(*pm);
         list->AddElement(track);
+        track->MakeTrack();
+        nTrackShowed++;
+    }
+
+}
+
+//-----------------------------------------------------------------
+void Gui3DController::AddRecoTracks()
+{
+    int trackerIdx = 0;
+    if (recoTrackList) {
+        recoTrackList->RemoveElements();
+    }
+    else {
+        recoTrackList = new TEveTrackList();
+        recoTrackList->GetPropagator()->SetStepper(TEveTrackPropagator::kRungeKutta);
+        recoTrackList->GetPropagator()->SetMaxR(1e4);
+        recoTrackList->GetPropagator()->SetMaxZ(1e4);
+        gEve->AddElement(recoTrackList);
+    }    
+    TString name;
+    name.Form("%i: Reco Tracks", currentEvent);
+    recoTrackList->SetName(name.Data());
+
+    int nTrack = event->trk_nTrack[trackerIdx];  // number of tracks in MC
+    TEveRecTrackD *rc = 0;
+    TEveTrack* track = 0;
+    TEvePathMarkD* pm = 0;
+    int colors[6] = {kMagenta, kGreen, kYellow, kRed, kCyan, kWhite};
+    int nTrackShowed = 0;
+    for (int i=0; i<nTrack; i++) {
+        rc = new TEveRecTrackD();
+        rc->fV.Set((*event->trk_points_x[trackerIdx]).at(i).at(0), 
+                   (*event->trk_points_y[trackerIdx]).at(i).at(0), 
+                   (*event->trk_points_z[trackerIdx]).at(i).at(0));
+        track = new TEveTrack(rc, list->GetPropagator());
+        TString s;
+        s.Form("track %i", i);
+        track->SetName(s.Data());
+        track->SetLineColor( colors[nTrackShowed % 6] );
+        track->SetLineWidth( 2 );
+        for (int ipm = 1; ipm<(*event->trk_nHit[trackerIdx]).at(i); ipm++) {
+            pm = new TEvePathMarkD(TEvePathMarkD::kReference);
+            pm->fV.Set((*event->trk_points_x[trackerIdx]).at(i).at(ipm), 
+                       (*event->trk_points_y[trackerIdx]).at(i).at(ipm), 
+                       (*event->trk_points_z[trackerIdx]).at(i).at(ipm));
+            track->AddPathMark(*pm);
+        }
+
+        recoTrackList->AddElement(track);
         track->MakeTrack();
         nTrackShowed++;
     }
