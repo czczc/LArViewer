@@ -4,7 +4,7 @@
 #include "MCChannel.h"
 #include <map>
 
-#define NCHANNELS 1992
+#define NCHANNELS 2048
 
 class TFile;
 class TTree;

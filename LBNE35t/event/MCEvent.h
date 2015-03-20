@@ -8,6 +8,7 @@
 class MCGeometry;
 class TFile;
 class TH2F;
+class TObjArray;
 
 class MCEvent {
 public:
@@ -16,7 +17,7 @@ public:
     MCGeometry *geom;
 
     enum LIMITS {
-        MAX_CHANNEL = 1992,
+        MAX_CHANNEL = 2048,
         MAX_TRACKS = 2000,
         MAX_HITS = 20000,
     };
@@ -63,6 +64,8 @@ public:
     float mc_startMomentum[MAX_TRACKS][4];  // start momentum of this track; size == mc_Ntrack
     float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
     std::vector<std::vector<int> > *mc_daughters;  // daughters id of this track; vector
+    TObjArray* mc_trackPosition;
+    TObjArray* mc_trackMomentum;
 
     int    no_hits;                  //number of hits
     int    hit_channel[MAX_HITS];    //channel ID

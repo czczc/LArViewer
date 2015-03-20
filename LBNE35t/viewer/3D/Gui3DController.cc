@@ -67,14 +67,40 @@ void Gui3DController::InitEvent()
 
 void Gui3DController::InitGeometry()
 {
-    // TGeoManager::Import("../Geometry/lbne35t4apa.gdml");
-    TGeoManager::Import("../Geometry/lbne35t4apa.root");
+    TGeoManager::Import("../Geometry/lbne35t4apa.gdml");
+    // TGeoManager::Import("../Geometry/lbne35t4apa.root");
     gGeoManager->DefaultColors();
     TGeoNode* world = gGeoManager->GetTopNode();
-    TGeoNode* cyro = world->GetDaughter(0)->GetDaughter(0);
-    int nDaughters = cyro->GetNdaughters();
+    TGeoNode *det = world->GetDaughter(0);
+    TGeoNode *cryo = det->GetDaughter(0);
+    TEveGeoTopNode* top = new TEveGeoTopNode(gGeoManager, world);
+    gEve->AddGlobalElement(top);
+
+    int nDaughters = world->GetNdaughters();
     for (int i=0; i<nDaughters; i++) {
-        TGeoNode *node = cyro->GetDaughter(i);
+      TGeoNode *node = world->GetDaughter(i);
+      TString name(node->GetName());
+      if (!name.Contains("DetEnclosure")) {
+        node->SetInvisible();
+        node->SetAllInvisible();
+      }
+    }
+
+    nDaughters = det->GetNdaughters();
+    for (int i=0; i<nDaughters; i++) {
+      TGeoNode *node = det->GetDaughter(i);
+      TString name(node->GetName());
+      // if (name.Contains("Foam") || name.Contains("Steel") 
+      //     || name.Contains("Concrete") || name.Contains("Neck")) {
+      if (! (node == cryo)) {
+        node->SetInvisible();
+        node->SetAllInvisible();
+      }
+    }
+
+    nDaughters = cryo->GetNdaughters();
+    for (int i=0; i<nDaughters; i++) {
+        TGeoNode *node = cryo->GetDaughter(i);
         TString name(node->GetName());
         if (name.Contains("Cathode")) {
             node->GetVolume()->SetLineColor(kCyan);
@@ -94,8 +120,18 @@ void Gui3DController::InitGeometry()
 
     }
 
-    TEveGeoTopNode* top = new TEveGeoTopNode(gGeoManager, world);
-    gEve->AddGlobalElement(top);
+
+    // nDaughters = cryo->GetNdaughters();
+    // for (int i=0; i<nDaughters; i++) {
+    //   TGeoNode *node = cryo->GetDaughter(i);
+    //   TString name(node->GetName());
+    //   if (name.Contains("TPC") || name.Contains("Steel") 
+    //       || name.Contains("Concrete") || name.Contains("Argon")) {
+    //     node->SetInvisible();
+    //     node->SetAllInvisible();
+    //   }
+    // }
+
 }
 
 void Gui3DController::InitNavigationFrame()
@@ -248,6 +284,7 @@ void Gui3DController::Run()
 {
     gEve->FullRedraw3D(kTRUE);
     TGLViewer *v = gEve->GetDefaultGLViewer();
+    // v->UseLightColorSet();
     v->CurrentCamera().RotateRad(-0.5, -2);
     // v->SetCurrentCamera(TGLViewer::kCameraPerspXOZ);
     v->SetGuideState(1, true, false, 0);

@@ -13,6 +13,8 @@
 #include "TCanvas.h"
 #include "TColor.h"
 #include "TLine.h"
+#include "TClonesArray.h"
+#include "TLorentzVector.h"
 
 using namespace std;
 
@@ -25,6 +27,10 @@ MCEvent::MCEvent(const char* filename)
     calib_wfADC = new std::vector<std::vector<int> >;
     calib_wfTDC = new std::vector<std::vector<int> >;
     mc_daughters = new std::vector<std::vector<int> >;  // daughters id of this track; vector
+
+
+    mc_trackPosition = new TObjArray();
+    mc_trackMomentum = new TObjArray();
 
     rootFile = new TFile(filename);
     simTree = (TTree*)rootFile->Get("/Event/Sim");
@@ -49,6 +55,8 @@ MCEvent::~MCEvent()
     delete calib_wfADC;
     delete calib_wfTDC;
     delete mc_daughters;
+    delete mc_trackPosition;
+    delete mc_trackMomentum;
 
     rootFile->Close();
     delete rootFile;
@@ -84,6 +92,9 @@ void MCEvent::InitBranchAddress()
     simTree->SetBranchAddress("mc_startMomentum", &mc_startMomentum);
     simTree->SetBranchAddress("mc_endMomentum"  , &mc_endMomentum);
 
+    simTree->SetBranchAddress("mc_trackPosition"  , &mc_trackPosition);
+    simTree->SetBranchAddress("mc_trackMomentum"  , &mc_trackMomentum);
+
     simTree->SetBranchAddress("no_hits"    , &no_hits);
     simTree->SetBranchAddress("hit_channel", &hit_channel);
     simTree->SetBranchAddress("hit_peakT"  , &hit_peakT);
@@ -97,10 +108,10 @@ void MCEvent::InitHistograms()
     // hPixelZT = new TH2F("hPixelZT", "Z vs T", 3200, 0-0.5, 3200-0.5, 400, 0-0.5, 400-0.5);
     // hPixelUT = new TH2F("hPixelUT", "U vs T", 3200, 0-0.5, 3200-0.5, 400, 0-0.5, 400-0.5);
     // hPixelVT = new TH2F("hPixelVT", "V vs T", 3200, 0-0.5, 3200-0.5, 400, 0-0.5, 400-0.5);
-
-    hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 343, 0, 0+343*0.45);
-    hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 510, -168, -168+510*0.4888);
-    hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*0.0775, 495, -53, -53+495*0.5012);
+    const double xPerTDC = 0.0802815;
+    hPixelZT = new TH2F("hPixelZT", "Z (|_ collection Y wire) vs X (drift axis)", 3200, -1, -1+3200*xPerTDC, 359, 0, 0+359*0.449055);
+    hPixelUT = new TH2F("hPixelUT", "V (|_  induction U wire ) vs X (drift axis)", 3200, -1, -1+3200*xPerTDC, 510, -53, -53+510*0.487811);
+    hPixelVT = new TH2F("hPixelVT", "U (|_  induction V wire ) vs X (drift axis)", 3200, -1, -1+3200*xPerTDC, 510, -168, -168+510*0.500144);
 
     hPixelZT->GetXaxis()->SetTitle("x [cm]");
     hPixelUT->GetXaxis()->SetTitle("x [cm]");
@@ -115,6 +126,13 @@ void MCEvent::GetEntry(int entry)
 {
     Reset();
     simTree->GetEntry(entry);
+    // mc_trackPosition->Print();
+    // TClonesArray *pos = (TClonesArray*)(*mc_trackPosition)[3];
+    // pos->Print();
+    // TLorentzVector* l = (TLorentzVector*)(*pos)[0];
+    // cout << mc_trackPosition->GetEntries() << endl;
+    // cout << pos->GetEntries() << endl;
+
     ProcessTracks();
     ProcessChannels();
 }

@@ -395,12 +395,12 @@ void GuiController::DrawTrack(int id)
 
 
     trackLineU->SetX1(event->mc_startXYZT[i][0]);
-    trackLineU->SetY1((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineU->SetY1((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
     trackLineU->SetX2(event->mc_endXYZT[i][0]);
-    trackLineU->SetY2((event->mc_endXYZT[i][1]-event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineU->SetY2((event->mc_endXYZT[i][1]+event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
 
     trackStartPointU->SetX(event->mc_startXYZT[i][0]);
-    trackStartPointU->SetY((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackStartPointU->SetY((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
 
     can->cd(2);
     trackLineU->Draw();
@@ -408,12 +408,12 @@ void GuiController::DrawTrack(int id)
 
 
     trackLineV->SetX1(event->mc_startXYZT[i][0]);
-    trackLineV->SetY1((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineV->SetY1((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
     trackLineV->SetX2(event->mc_endXYZT[i][0]);
-    trackLineV->SetY2((event->mc_endXYZT[i][1]+event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackLineV->SetY2((event->mc_endXYZT[i][1]-event->mc_endXYZT[i][2])*TMath::Sqrt(2)/2);
 
     trackStartPointV->SetX(event->mc_startXYZT[i][0]);
-    trackStartPointV->SetY((event->mc_startXYZT[i][1]+event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
+    trackStartPointV->SetY((event->mc_startXYZT[i][1]-event->mc_startXYZT[i][2])*TMath::Sqrt(2)/2);
 
     can->cd(3);
     trackLineV->Draw();

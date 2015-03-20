@@ -19,7 +19,7 @@ void LArProperties::Init()
     for (int i=0; i!=3; i++) {
         fEfield.push_back(e[i]);
     }
-         fTemperature = 87;     // K
+         fTemperature = 87.8;     // K
     fElectronlifetime = 3.0e3;  // microseconds
      fRadiationLength = 19.55;  // g/cm^2
     // Following parameters are for use in Bethe-Bloch formula for dE/dx.

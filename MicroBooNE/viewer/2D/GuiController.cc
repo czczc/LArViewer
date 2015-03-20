@@ -477,8 +477,8 @@ void GuiController::Reload()
 {    
     cw->fEventEntry->SetNumber(currentEventEntry);
     event->GetEntry(currentEventEntry);
-    // event->PrintInfo(1);
-    event->PrintInfo();
+    event->PrintInfo(2);
+    // event->PrintInfo();
     iw->DrawEventInfo(event);
 
     MCTrackSelected(1); // select the first track
