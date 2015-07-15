@@ -38,7 +38,7 @@
 #include <map>
 using namespace std;
 
-GuiController::GuiController(const TGWindow *p, int w,int h)
+GuiController::GuiController(const TGWindow *p, int w, int h, const char* filename)
 {
     // InitPDGMap();
     dbPDG = new TDatabasePDG();
@@ -77,19 +77,24 @@ GuiController::GuiController(const TGWindow *p, int w,int h)
     iw = mw->fControlWindow->fInfoWindow;
     can = vw->can;
 
-    const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
-    static TString dir("../data");
-    TGFileInfo fi;
-    fi.fFileTypes = filetypes;
-    fi.fIniDir    = StrDup(dir);
-    new TGFileDialog(gClient->GetRoot(), mw, kFDOpen, &fi);
-    dir = fi.fIniDir;
+    if (!filename) {
+        const char *filetypes[] = {"ROOT files", "*.root", 0, 0};
+        static TString dir("../data");
+        TGFileInfo fi;
+        fi.fFileTypes = filetypes;
+        fi.fIniDir    = StrDup(dir);
+        new TGFileDialog(gClient->GetRoot(), mw, kFDOpen, &fi);
+        dir = fi.fIniDir;
 
-    // event = new MCEvent("../data/sample.root");
-    event = new MCEvent(fi.fFilename);
+        // event = new MCEvent("../data/sample.root");
+        event = new MCEvent(fi.fFilename);
+    }
+    else {
+        event = new MCEvent(filename);
+    }
     geom = event->geom;
     currentEvent = 0;
-    xMin_now = 0; 
+    xMin_now = 0;
     xMax_now = 3200;
     Reload();
 
@@ -128,7 +133,7 @@ void GuiController::InitConnections()
     can->GetPad(2)->Connect("RangeChanged()", "GuiController", this, "SyncRangeUT()");
     can->GetPad(3)->Connect("RangeChanged()", "GuiController", this, "SyncRangeVT()");
 
-    can->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "GuiController", 
+    can->Connect("ProcessedEvent(Int_t,Int_t,Int_t,TObject*)", "GuiController",
            this, "ProcessCanvasEvent(Int_t,Int_t,Int_t,TObject*)");
 
 }
@@ -151,7 +156,7 @@ void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *sele
         else { cout << "not recognized: " << name << endl; return;}
         int wirehash = (*m)[biny];
         int channelNo = geom->wireToChannel[wirehash];
-        cout 
+        cout
             // << "event: " << ev
             << "x: " << xx
             << ", y: " << yy
@@ -166,7 +171,7 @@ void GuiController::ProcessCanvasEvent(Int_t ev, Int_t x, Int_t y, TObject *sele
 }
 
 void GuiController::AutoZoom()
-{    
+{
     AutoZoom(event->hPixelZT);
     AutoZoom(event->hPixelUT, false);
     AutoZoom(event->hPixelVT, false);
@@ -175,14 +180,14 @@ void GuiController::AutoZoom()
 }
 
 void GuiController::UnZoom(bool redraw)
-{    
+{
     xMin_now = 1;
     xMax_now = 3200;
-    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now); 
-    event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now); 
+    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now);
+    event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now);
     event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
-    event->hPixelZT->GetYaxis()->SetRange(1, 343); 
-    event->hPixelUT->GetYaxis()->SetRange(1, 510); 
+    event->hPixelZT->GetYaxis()->SetRange(1, 343);
+    event->hPixelUT->GetYaxis()->SetRange(1, 510);
     event->hPixelVT->GetYaxis()->SetRange(1, 495);
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
@@ -194,7 +199,7 @@ void GuiController::SyncRangeZT()
 {
     xMin_now = event->hPixelZT->GetXaxis()->GetFirst();
     xMax_now = event->hPixelZT->GetXaxis()->GetLast();
-    event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now); 
+    event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now);
     event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
@@ -220,7 +225,7 @@ void GuiController::SyncRangeUT()
 {
     xMin_now = event->hPixelUT->GetXaxis()->GetFirst();
     xMax_now = event->hPixelUT->GetXaxis()->GetLast();
-    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now); 
+    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now);
     event->hPixelVT->GetXaxis()->SetRange(xMin_now, xMax_now);
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
@@ -232,7 +237,7 @@ void GuiController::SyncRangeVT()
 {
     xMin_now = event->hPixelVT->GetXaxis()->GetFirst();
     xMax_now = event->hPixelVT->GetXaxis()->GetLast();
-    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now); 
+    event->hPixelZT->GetXaxis()->SetRange(xMin_now, xMax_now);
     event->hPixelUT->GetXaxis()->SetRange(xMin_now, xMax_now);
     cw->tdcMinEntry->SetIntNumber(xMin_now);
     cw->tdcMaxEntry->SetIntNumber(xMax_now);
@@ -241,10 +246,10 @@ void GuiController::SyncRangeVT()
 }
 
 void GuiController::SyncXaxis()
-{   
+{
     double x1 = cw->tdcMinEntry->GetNumber();
     double x2 = cw->tdcMaxEntry->GetNumber();
-    
+
     event->hPixelZT->GetXaxis()->SetRange(x1, x2);
     event->hPixelUT->GetXaxis()->SetRange(x1, x2);
     event->hPixelVT->GetXaxis()->SetRange(x1, x2);
@@ -254,7 +259,7 @@ void GuiController::SyncXaxis()
 
 void GuiController::UpdatePalette(int id)
 {
-    if (id == currentPalette) return; 
+    if (id == currentPalette) return;
          if (id == 1) vw->PaletteRainbow();
     else if (id == 2) vw->PaletteGray();
     else if (id == 3) vw->PaletteSummer();
@@ -336,7 +341,7 @@ void GuiController::SetTheme(int theme)
 }
 
 void GuiController::Modified()
-{   
+{
 
     can->GetPad(1)->Modified();
     // can->GetPad(1)->Update();
@@ -377,7 +382,7 @@ void GuiController::DrawPixels()
 }
 
 
-void GuiController::DrawTrack(int id) 
+void GuiController::DrawTrack(int id)
 {
     int i = event->trackIndex[id];
     // cout << i << " " << event->mc_startXYZT[i][0] << endl;
@@ -491,7 +496,7 @@ void GuiController::Next()
 
 
 void GuiController::Reload()
-{    
+{
     cw->eventEntry->SetNumber(currentEvent);
     event->GetEntry(currentEvent);
     // event->PrintInfo(1);
@@ -506,7 +511,7 @@ void GuiController::Reload()
 
 
 void GuiController::InitTracksList()
-{   
+{
 
     cw->fSiblingTracksListBox->RemoveAll();
     cw->fParentTracksListBox->RemoveAll();
@@ -611,7 +616,7 @@ void GuiController::AutoZoom(TH2F* hist, bool zoomX)
 
     for(Int_t i = 1; i <= hist->GetNbinsX(); i++){
         for(Int_t j = 1; j <= hist->GetNbinsY(); j++){
-      
+
             if(hist->GetBinContent(i, j) <= 1) continue;
 
             if(i < xMin) xMin = i;
@@ -640,14 +645,14 @@ double GuiController::KE(float* momentum)
 
 
 TGString GuiController::PDGName(int pdg)
-{   
+{
     TParticlePDG *p = dbPDG->GetParticle(pdg);
     if (p == 0) {
         if (pdg>1e9) {
             int z = (pdg - 1e9) / 10000;
             int a = (pdg - 1e9 - z*1e4) / 10;
             TGString name;
-            if (z == 18) name = "Ar";   
+            if (z == 18) name = "Ar";
 
             else if (z == 17) name = "Cl";
             else if (z == 19) name = "Ca";

@@ -66,7 +66,7 @@ void ViewWindow::InitStyle()
     gStyle->SetLabelSize(0.06, "y");
     gStyle->SetHistLineWidth(2);
     gStyle->SetLegendBorderSize(0);
-    
+
     gStyle->SetPadLeftMargin(0.08);
     gStyle->SetPadRightMargin(0.04);
     gStyle->SetMarkerSize(0.3);
